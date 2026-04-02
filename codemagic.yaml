@@ -18,7 +18,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.reichardreviews.medterms
       flutter: 3.29.3
-      xcode: latest
+      xcode: 15.4
       cocoapods: default
       vars:
         APP_STORE_APP_ID: "6752959809"
@@ -41,8 +41,10 @@ workflows:
         script: |
           xcode-project use-profiles
           flutter build ipa --release \
-            --export-options-plist=/Users/builder/export_options.plist \
-            --dart-define=FLUTTER_MIN_IOS_DEPLOYMENT_TARGET=13.0
+            --export-options-plist=/Users/builder/export_options.plist
+          # Fix MinimumOSVersion in App.framework Info.plist
+          /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 13.0" \
+            "$(find build/ios/archive -name 'App.framework' -path '*/Runner.app/*')/Info.plist"
 
     artifacts:
       - build/ios/ipa/*.ipa
