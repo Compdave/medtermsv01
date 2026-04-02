@@ -39,7 +39,8 @@ workflows:
       - name: Build iOS release
         script: |
           xcode-project use-profiles
-          flutter build ipa --release
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
