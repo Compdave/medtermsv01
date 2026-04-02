@@ -42,9 +42,6 @@ workflows:
           xcode-project use-profiles
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
-          # Fix MinimumOSVersion in App.framework Info.plist
-          /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 13.0" \
-            "$(find build/ios/archive -name 'App.framework' -path '*/Runner.app/*')/Info.plist"
 
     artifacts:
       - build/ios/ipa/*.ipa
