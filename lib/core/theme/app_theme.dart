@@ -11,8 +11,8 @@ class AppColors {
   static const primaryDark = Color(0xFF0F4A3D);
 
   // ── Accent: Bright Green ────────────────────────────────────────────────────
-  static const accent = Color(0xFF3CC94A);
-  static const accentDark = Color(0xFF2DA83A);
+  static const accent = Color.fromARGB(255, 44, 128, 76);
+  static const accentDark = Color.fromARGB(255, 44, 128, 76);
 
   // ── Background ──────────────────────────────────────────────────────────────
   static const backgroundTop = Color(0xFF1A6B5A);

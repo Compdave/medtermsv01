@@ -10,11 +10,16 @@ import 'package:medtermsv01/core/theme/app_theme.dart';
 
 /// Purchase bottom sheet — handles RevenueCat IAP for mobile.
 /// Shows module details, fetches live price from RC, and processes purchase.
+///
+/// [onPurchaseComplete] — optional callback fired after a successful purchase.
+/// Use this to set the newly purchased module as default and navigate home.
+/// If not provided, falls back to the default snackbar behaviour.
 class RevenuecatBottomSheet extends ConsumerStatefulWidget {
   final String moduleName;
   final int quizCount;
   final String apptype;
   final int quizId;
+  final VoidCallback? onPurchaseComplete;
 
   const RevenuecatBottomSheet({
     super.key,
@@ -22,6 +27,7 @@ class RevenuecatBottomSheet extends ConsumerStatefulWidget {
     required this.quizCount,
     required this.apptype,
     required this.quizId,
+    this.onPurchaseComplete,
   });
 
   static Future<void> show(
@@ -30,6 +36,7 @@ class RevenuecatBottomSheet extends ConsumerStatefulWidget {
     required int quizCount,
     required String apptype,
     required int quizId,
+    VoidCallback? onPurchaseComplete,
   }) {
     return showModalBottomSheet(
       context: context,
@@ -40,6 +47,7 @@ class RevenuecatBottomSheet extends ConsumerStatefulWidget {
         quizCount: quizCount,
         apptype: apptype,
         quizId: quizId,
+        onPurchaseComplete: onPurchaseComplete,
       ),
     );
   }
@@ -94,13 +102,21 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('"${widget.moduleName}" unlocked! Ready to study.'),
-            backgroundColor: AppColors.primary,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+
+        // FIX: if a callback was provided (e.g. from selectMode), use it.
+        // Otherwise fall back to default snackbar behaviour.
+        if (widget.onPurchaseComplete != null) {
+          widget.onPurchaseComplete!();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('"${widget.moduleName}" unlocked! Ready to study.'),
+              backgroundColor: AppColors.primary,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     } on PurchasesError catch (e) {
       if (mounted) {
@@ -182,7 +198,8 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
             ),
             const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
@@ -212,11 +229,10 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
               width: double.infinity,
               height: 52,
               child: ElevatedButton(
-                onPressed: (_isPurchasing ||
-                        _isLoadingPackage ||
-                        _package == null)
-                    ? null
-                    : _purchase,
+                onPressed:
+                    (_isPurchasing || _isLoadingPackage || _package == null)
+                        ? null
+                        : _purchase,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.accent,
                   foregroundColor: Colors.white,

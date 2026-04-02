@@ -111,7 +111,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           error: (e, _) => Center(child: Text('Error: $e')),
           data: (user) {
-            // Derive isGuest from user model — don't rely on widget param
             final isGuest = user?.isGuest ?? false;
             return SafeArea(
               child: SingleChildScrollView(
@@ -141,7 +140,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Welcome Header
+  // Welcome Header — FIX: name uses FittedBox to prevent overflow
   // ---------------------------------------------------------------------------
 
   Widget _buildWelcomeHeader(String? displayName, bool isGuest) {
@@ -169,26 +168,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
         const SizedBox(width: 14),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Welcome back',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-                fontWeight: FontWeight.w400,
+        // FIX: Expanded + FittedBox so long names shrink instead of overflow
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Welcome back',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-            ),
-            Text(
-              isGuest ? 'Guest' : (displayName ?? 'Friend'),
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF1A3A6B),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  isGuest ? 'Guest' : (displayName ?? 'Friend'),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A3A6B),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -199,16 +205,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // ---------------------------------------------------------------------------
 
   Widget _buildBody(List<Map<String, dynamic>> modules, bool isGuest) {
-    // Find the sample module (quiz_id with sample = true)
     final sampleModule = modules.firstWhere(
       (m) => m['sample'] == true,
       orElse: () => {},
     );
 
-    // Find purchased full modules
+    // FIX: track whether any paid module is purchased
     final purchasedModules = modules
         .where((m) => m['purchased'] == true && m['sample'] != true)
         .toList();
+    final hasPurchasedModule = purchasedModules.isNotEmpty;
 
     return Column(
       children: [
@@ -216,7 +222,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         const SizedBox(height: 20),
         _buildNavGrid(modules),
         const SizedBox(height: 20),
-        if (!isGuest) _buildUnlockCard(purchasedModules.isEmpty),
+        if (!isGuest) _buildUnlockCard(hasPurchasedModule),
         if (!isGuest) const SizedBox(height: 20),
         if (!isGuest) _buildActionButtons(),
         const SizedBox(height: 32),
@@ -355,7 +361,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       setDialogState(() {});
                       await _setTimerPref(val);
                       if (!val) {
-                        // Reset duration for all modules when timer turned off
                         final userId = SupabaseService.currentUserId ?? '';
                         final modules =
                             ref.read(moduleListProvider).value ?? [];
@@ -440,7 +445,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Widget _buildNavGrid(List<Map<String, dynamic>> modules) {
-    // Get first unlocked quiz for stats
     final firstUnlocked = modules.firstWhere(
       (m) => m['purchased'] == true || m['sample'] == true,
       orElse: () => {},
@@ -523,9 +527,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // ---------------------------------------------------------------------------
   // Unlock Card
+  // FIX: shows different title/subtitle/button depending on purchase state
   // ---------------------------------------------------------------------------
 
-  Widget _buildUnlockCard(bool noModulesPurchased) {
+  Widget _buildUnlockCard(bool hasPurchasedModule) {
+    // When modules are purchased: show "Select Working Module"
+    // When nothing purchased: show "Unlock Full Course"
+    final title =
+        hasPurchasedModule ? 'Select Working Module' : 'Unlock Full Course';
+    final subtitle = hasPurchasedModule
+        ? 'Switch your active module'
+        : 'Get Access to the full module';
+    final buttonLabel =
+        hasPurchasedModule ? 'Change Module' : 'Select Module';
+    final icon = hasPurchasedModule
+        ? Icons.swap_horiz_rounded
+        : Icons.lock_outline_rounded;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -535,14 +553,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       child: Column(
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.lock_outline_rounded, color: Colors.white, size: 22),
-              SizedBox(width: 8),
+              Icon(icon, color: Colors.white, size: 22),
+              const SizedBox(width: 8),
               Text(
-                'Unlock Full Course',
-                style: TextStyle(
+                title,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: Colors.white,
@@ -551,16 +569,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Get Access to the full module',
-            style: TextStyle(fontSize: 13, color: Colors.white70),
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 13, color: Colors.white70),
           ),
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              onPressed: () => context.push('/modules'),
+              // FIX: pass selectMode=true when user already has a module,
+              // so the modules list sets default instead of launching quiz
+              onPressed: () => context.push(
+                hasPurchasedModule ? '/modules?selectMode=true' : '/modules',
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
@@ -568,9 +590,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text(
-                'Select Module',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              child: Text(
+                buttonLabel,
+                style: const TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -735,7 +758,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // ---------------------------------------------------------------------------
 
   Future<void> _confirmResetModules() async {
-    // Get all unlocked modules for the picker
     final modules = ref.read(moduleListProvider).value ?? [];
     final unlocked = modules
         .where((m) => m['purchased'] == true || m['sample'] == true)
@@ -751,7 +773,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return;
     }
 
-    // Step 1 — pick a module
     final selectedModule = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (_) => AlertDialog(
@@ -804,7 +825,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     if (selectedModule == null || !mounted) return;
 
-    // Step 2 — confirm reset
     final quizId = selectedModule['quiz_id'] as int?;
     final quizName = selectedModule['quiz_name'] as String? ?? 'this module';
     if (quizId == null) return;
@@ -834,7 +854,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     if (confirmed != true || !mounted) return;
 
-    // Step 3 — perform reset
     final userId = SupabaseService.currentUserId ?? '';
     try {
       await QuizService.resetAllUserAnswers(
