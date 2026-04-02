@@ -12,6 +12,8 @@ workflows:
       app_store_connect: Codemagic  # Name of your ASC integration in CM settings
 
     environment:
+      groups:
+        - secrets
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.reichardreviews.medterms
@@ -22,6 +24,10 @@ workflows:
         APP_STORE_APP_ID: "6752959809"
 
     scripts:
+      - name: Create app_secrets.dart
+        script: |
+          mkdir -p lib/core/config
+          echo "$APP_SECRETS_DART" > lib/core/config/app_secrets.dart
       - name: Get Flutter packages
         script: flutter pub get
 
