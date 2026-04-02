@@ -1,0 +1,75 @@
+# codemagic.yaml
+# Codemagic CI/CD configuration for medtermsv01
+# Builds iOS IPA and submits to App Store Connect TestFlight
+
+workflows:
+  ios-release:
+    name: iOS Release
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    integrations:
+      app_store_connect: Codemagic  # Name of your ASC integration in CM settings
+
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.reichardreviews.medterms
+      flutter: 3.29.3
+      xcode: latest
+      cocoapods: default
+      vars:
+        APP_STORE_APP_ID: "YOUR_APP_ID"  # TODO: add from App Store Connect
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+
+      - name: Build iOS release
+        script: |
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers
+
+  android-release:
+    name: Android Release
+    max_build_duration: 60
+    instance_type: linux_x2
+
+    environment:
+      flutter: 3.29.3
+      android_signing:
+        - medtermsv01_keystore  # Name of keystore credential in CM settings
+      vars:
+        PACKAGE_NAME: "com.reichardreviews.medterms"
+
+    scripts:
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Build Android release AAB
+        script: |
+          flutter build appbundle --release
+
+    artifacts:
+      - build/app/outputs/bundle/release/app-release.aab
+
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
