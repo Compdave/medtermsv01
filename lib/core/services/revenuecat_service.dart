@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:flutter/foundation.dart';
 // lib/core/services/revenuecat_service.dart
 
@@ -54,7 +56,8 @@ class RevenueCatService {
       debugPrint('RC all offerings: \${offerings.all.keys.toList()}');
       if (offerings.current != null) {
         for (final p in offerings.current!.availablePackages) {
-          debugPrint('RC package: \${p.identifier} / product: \${p.storeProduct.identifier} / price: \${p.storeProduct.priceString}');
+          debugPrint(
+              'RC package: \${p.identifier} / product: \${p.storeProduct.identifier} / price: \${p.storeProduct.priceString}');
         }
       }
       return offerings;
@@ -70,7 +73,7 @@ class RevenueCatService {
   static Future<Package?> fetchPackage(String productId) async {
     try {
       final offerings = await Purchases.getOfferings();
-      
+
       // Search current offering first
       if (offerings.current != null) {
         for (final package in offerings.current!.availablePackages) {
