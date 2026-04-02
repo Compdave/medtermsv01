@@ -32,6 +32,7 @@ workflows:
 
       - name: Build iOS release
         script: |
+          xcode-project use-profiles
           flutter build ipa --release
 
     artifacts:
