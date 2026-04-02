@@ -15,8 +15,6 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.reichardreviews.medterms
-        provisioning_profile: medterms_appstore_prof
-        certificate: medterms_distribution
       flutter: 3.29.3
       xcode: latest
       cocoapods: default
