@@ -15,13 +15,13 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.reichardreviews.medterms
-        provisioning_profile: medterms_appstore_prof  # exact name as shown in Codemagic
-        certificate: medterms_distribution       # exact name of the cert in Codemagic
+        provisioning_profile: medterms_appstore_prof
+        certificate: medterms_distribution
       flutter: 3.29.3
       xcode: latest
       cocoapods: default
       vars:
-        APP_STORE_APP_ID: "YOUR_APP_ID"  # TODO: add from App Store Connect
+        APP_STORE_APP_ID: "6752959809"
 
     scripts:
       - name: Get Flutter packages
