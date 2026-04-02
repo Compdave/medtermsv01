@@ -1,0 +1,78 @@
+name: medtermsv01
+description: Medical Terminology Q&A App
+publish_to: 'none'
+version: 2.21.38
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # ── Supabase ──────────────────────────────────────────────
+  supabase_flutter: ^2.5.6          # Supabase client + auth + realtime
+
+
+  # ── LemonSqueezy (web purchases) ─────────────────────────
+  url_launcher: ^6.3.0              # Opens LemonSqueezy checkout URL in browser
+  purchases_flutter: ^9.15.1
+
+  # ── State Management ─────────────────────────────────────
+  flutter_riverpod: ^2.5.1          # Riverpod state management
+  riverpod_annotation: ^2.3.5       # Code-gen annotations for Riverpod
+
+  # ── Navigation ───────────────────────────────────────────
+  go_router: ^13.2.0                # Declarative routing (FF uses this too)
+
+  # ── Timer / Date Utilities ───────────────────────────────
+  intl: ^0.19.0                     # Date/time formatting for timer display
+
+  # ── UI & Theming ─────────────────────────────────────────
+  google_fonts: ^6.2.1              # Font loading (match your current typography)
+  flutter_svg: ^2.0.10+1            # SVG support for icons/logo
+  cached_network_image: ^3.3.1      # Cached image loading for module artwork
+  shimmer: ^3.0.0                   # Loading skeleton placeholders
+  lottie: ^3.1.0                    # Lottie animations (score celebration etc.)
+
+  webview_flutter: ^4.10.0
+
+  # ── Shared Preferences / Local Storage ───────────────────
+  shared_preferences: ^2.3.1        # Persist timer preference, guest mode flag
+
+  # ── Connectivity ─────────────────────────────────────────
+  connectivity_plus: ^6.0.3         # Detect online/offline state
+
+
+  # ── Package Info ─────────────────────────────────────────
+  package_info_plus: ^8.0.2         # Read app version for [strVer] display
+
+  # ── Deep Links (LemonSqueezy webhook redirect) ───────────
+  app_links: ^6.1.1                 # Handle deep links after web purchase
+
+  # ── Misc Utilities ───────────────────────────────────────
+  equatable: ^2.0.5                 # Value equality for models
+  uuid: ^4.4.0                      # Generate UUIDs if needed client-side
+  collection: ^1.18.0               # Extended collection utilities
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0             # Lint rules
+  build_runner: ^2.4.9              # Code generation runner
+  riverpod_generator: ^2.4.0        # Riverpod code-gen
+  custom_lint: ^0.6.4               # Riverpod lint rules
+  riverpod_lint: ^2.3.10
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/                # App logo, module artwork
+    - assets/icons/                 # Custom icons if needed
+    - assets/animations/            # Lottie JSON files (score screen etc.)
+
+  # fonts:                          # Uncomment if using local fonts
+  #   - family: YourFont
+  #     fonts:
+  #       - asset: assets/fonts/YourFont-Regular.ttf
