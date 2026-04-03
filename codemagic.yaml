@@ -42,6 +42,19 @@ workflows:
           xcode-project use-profiles
           flutter build ipa --release \
             --export-options-plist=/Users/builder/export_options.plist
+          
+          # Patch MinimumOSVersion in App.framework inside the IPA
+          cd build/ios/ipa
+          mkdir -p /tmp/ipa_patch
+          cp medtermsv01.ipa /tmp/ipa_patch/
+          cd /tmp/ipa_patch
+          unzip -q medtermsv01.ipa
+          PLIST="Payload/Runner.app/Frameworks/App.framework/Info.plist"
+          /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 13.0" "$PLIST" || \
+          /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 13.0" "$PLIST"
+          zip -qr medtermsv01_patched.ipa Payload
+          cp medtermsv01_patched.ipa /Users/builder/clone/build/ios/ipa/medtermsv01.ipa
+          cd /Users/builder/clone
 
     artifacts:
       - build/ios/ipa/*.ipa
