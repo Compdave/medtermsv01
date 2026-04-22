@@ -73,6 +73,17 @@ workflows:
       - name: Generate launcher icons
         script: dart run flutter_launcher_icons
 
+      - name: Set MedTerms bundle ID in Xcode project
+        script: |
+          cd ios
+          /usr/libexec/PlistBuddy -c \
+            "Set :CFBundleIdentifier com.reichardreviews.medterms" \
+            Runner/Info.plist
+          sed -i '' \
+            's/PRODUCT_BUNDLE_IDENTIFIER = com.reichardreviews.teassci26/PRODUCT_BUNDLE_IDENTIFIER = com.reichardreviews.medterms/g' \
+            Runner.xcodeproj/project.pbxproj
+
+
       - name: Install CocoaPods
         script: |
           cd ios
@@ -251,6 +262,20 @@ workflows:
 
       - name: Generate launcher icons
         script: dart run flutter_launcher_icons
+
+
+      - name: Set TEAS bundle ID in Xcode project
+        script: |
+          cd ios
+          /usr/libexec/PlistBuddy -c \
+            "Set :CFBundleIdentifier com.reichardreviews.teassci26" \
+            Runner/Info.plist
+          sed -i '' \
+            's/PRODUCT_BUNDLE_IDENTIFIER = com.reichardreviews.medterms/PRODUCT_BUNDLE_IDENTIFIER = com.reichardreviews.teassci26/g' \
+            Runner.xcodeproj/project.pbxproj
+
+
+
 
       - name: Install CocoaPods
         script: |
