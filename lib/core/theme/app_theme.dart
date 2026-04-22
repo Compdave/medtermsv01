@@ -1,32 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:medtermsv01/core/config/app_config.dart';
 
 // ── App Color Palette ─────────────────────────────────────────────────────────
+// Dynamic colors read from AppConfig.instance at runtime — flavor-aware.
+// Static colors are fixed semantic values shared across all flavors.
 class AppColors {
   AppColors._();
 
-  // ── Primary: Dark Teal ──────────────────────────────────────────────────────
-  static const primary = Color(0xFF1A6B5A);
-  static const primaryLight = Color(0xFF2D8C74);
-  static const primaryDark = Color(0xFF0F4A3D);
+  // ── Dynamic: read from AppConfig ────────────────────────────────────────────
+  static Color get primary => AppConfig.instance.primaryColor;
+  static Color get primaryDark =>
+      Color.lerp(AppConfig.instance.primaryColor, Colors.black, 0.3)!;
+  static Color get primaryLight =>
+      Color.lerp(AppConfig.instance.primaryColor, Colors.white, 0.25)!;
+  static Color get accent => AppConfig.instance.accentColor;
+  static Color get accentDark =>
+      Color.lerp(AppConfig.instance.accentColor, Colors.black, 0.15)!;
 
-  // ── Accent: Bright Green ────────────────────────────────────────────────────
-  static const accent = Color.fromARGB(255, 44, 128, 76);
-  static const accentDark = Color.fromARGB(255, 44, 128, 76);
-
-  // ── Background ──────────────────────────────────────────────────────────────
-  static const backgroundTop = Color(0xFF1A6B5A);
-  static const backgroundBottom = Color(0xFFB2EDE0);
-  static const backgroundCard = Color(0xFFD6F5EE);
-  static const backgroundCardDark = Color(0xFF1F7A66);
+  // ── Dynamic: derived from gradient colors ───────────────────────────────────
+  static Color get backgroundTop => AppConfig.instance.gradientTop;
+  static Color get backgroundBottom => AppConfig.instance.gradientBottom;
+  static Color get backgroundCard =>
+      Color.lerp(AppConfig.instance.gradientBottom, Colors.white, 0.5)!;
+  static Color get backgroundCardDark =>
+      Color.lerp(AppConfig.instance.primaryColor, Colors.black, 0.1)!;
+  static Color get scaffoldBackground =>
+      Color.lerp(AppConfig.instance.gradientBottom, Colors.white, 0.3)!;
 
   // ── Text ────────────────────────────────────────────────────────────────────
   static const textPrimary = Color(0xFF0F2D27);
-  static const textSecondary = Color(0xFF4A7A70);
+  static Color get textSecondary =>
+      Color.lerp(AppConfig.instance.primaryColor, Colors.black, 0.1)!
+          .withValues(alpha: 0.7);
   static const textOnDark = Color(0xFFFFFFFF);
   static const textOnAccent = Color(0xFFFFFFFF);
 
-  // ── Semantic ────────────────────────────────────────────────────────────────
+  // ── Semantic — fixed across all flavors ─────────────────────────────────────
   static const success = Color(0xFF3CC94A);
   static const error = Color(0xFFE53935);
   static const warning = Color(0xFFFFC107);
@@ -34,8 +44,10 @@ class AppColors {
 
   // ── Neutral ─────────────────────────────────────────────────────────────────
   static const white = Color(0xFFFFFFFF);
-  static const divider = Color(0xFFB2D8D0);
-  static const disabled = Color(0xFFA0C4BC);
+  static Color get divider =>
+      AppConfig.instance.primaryColor.withValues(alpha: 0.2);
+  static Color get disabled =>
+      AppConfig.instance.primaryColor.withValues(alpha: 0.35);
   static const shadow = Color(0x1A000000);
 }
 
@@ -45,12 +57,14 @@ class AppTheme {
 
   static ThemeData get lightTheme {
     final base = ThemeData.light(useMaterial3: true);
+    final primary = AppConfig.instance.primaryColor;
+    final accent = AppConfig.instance.accentColor;
 
     return base.copyWith(
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
-        primary: AppColors.primary,
-        secondary: AppColors.accent,
+        seedColor: primary,
+        primary: primary,
+        secondary: accent,
         surface: AppColors.backgroundCard,
         error: AppColors.error,
         onPrimary: AppColors.textOnDark,
@@ -58,9 +72,9 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         brightness: Brightness.light,
       ),
-      scaffoldBackgroundColor: AppColors.backgroundBottom,
+      scaffoldBackgroundColor: AppColors.scaffoldBackground,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.primary,
+        backgroundColor: primary,
         foregroundColor: AppColors.textOnDark,
         elevation: 0,
         centerTitle: false,
@@ -74,7 +88,7 @@ class AppTheme {
       textTheme: _buildTextTheme(),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.accent,
+          backgroundColor: accent,
           foregroundColor: AppColors.textOnAccent,
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
@@ -90,9 +104,9 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: primary,
           minimumSize: const Size(double.infinity, 52),
-          side: const BorderSide(color: AppColors.primary, width: 1.5),
+          side: BorderSide(color: primary, width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),
@@ -104,7 +118,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: primary,
           textStyle: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -128,7 +142,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -143,8 +157,6 @@ class AppTheme {
           fontSize: 14,
         ),
       ),
-
-      // ── CardThemeData (not CardTheme) — fixes type assignment error ─────────
       cardTheme: CardThemeData(
         color: AppColors.backgroundCard,
         elevation: 2,
@@ -154,22 +166,20 @@ class AppTheme {
         ),
         margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       ),
-
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         showDragHandle: true,
-        dragHandleColor: AppColors.divider,
       ),
-      dividerTheme: const DividerThemeData(
+      dividerTheme: DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
         space: 1,
       ),
-      iconTheme: const IconThemeData(
-        color: AppColors.primary,
+      iconTheme: IconThemeData(
+        color: primary,
         size: 24,
       ),
       snackBarTheme: SnackBarThemeData(
@@ -278,37 +288,36 @@ class AppTheme {
 class AppGradient {
   AppGradient._();
 
-  static const LinearGradient background = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      AppColors.backgroundTop,
-      AppColors.backgroundBottom,
-    ],
-  );
+  static LinearGradient get background => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          AppColors.backgroundTop,
+          AppColors.backgroundBottom,
+        ],
+      );
 
-  static const LinearGradient subtle = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      AppColors.backgroundCard,
-      AppColors.backgroundBottom,
-    ],
-  );
+  static LinearGradient get subtle => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.backgroundCard,
+          AppColors.backgroundBottom,
+        ],
+      );
 
-  static const LinearGradient darkCard = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      AppColors.primaryDark,
-      AppColors.primary,
-    ],
-  );
+  static LinearGradient get darkCard => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.primaryDark,
+          AppColors.primary,
+        ],
+      );
 
-  // ── Fix: lowerCamelCase method name ────────────────────────────────────────
   static Widget backgroundWrap({required Widget child}) {
     return Container(
-      decoration: const BoxDecoration(gradient: background),
+      decoration: BoxDecoration(gradient: background),
       child: child,
     );
   }
@@ -318,31 +327,31 @@ class AppGradient {
 class AppButtonStyles {
   AppButtonStyles._();
 
-  static ButtonStyle darkTeal = ElevatedButton.styleFrom(
-    backgroundColor: AppColors.primaryDark,
-    foregroundColor: AppColors.textOnDark,
-    minimumSize: const Size(double.infinity, 52),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(30),
-    ),
-    elevation: 2,
-    textStyle: GoogleFonts.poppins(
-      fontSize: 15,
-      fontWeight: FontWeight.w600,
-    ),
-  );
+  static ButtonStyle get darkPrimary => ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.textOnDark,
+        minimumSize: const Size(double.infinity, 52),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        elevation: 2,
+        textStyle: GoogleFonts.poppins(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      );
 
-  static ButtonStyle halfWidth = ElevatedButton.styleFrom(
-    backgroundColor: AppColors.primaryDark,
-    foregroundColor: AppColors.textOnDark,
-    minimumSize: const Size(0, 52),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(30),
-    ),
-    elevation: 2,
-    textStyle: GoogleFonts.poppins(
-      fontSize: 15,
-      fontWeight: FontWeight.w600,
-    ),
-  );
+  static ButtonStyle get halfWidth => ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primaryDark,
+        foregroundColor: AppColors.textOnDark,
+        minimumSize: const Size(0, 52),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        elevation: 2,
+        textStyle: GoogleFonts.poppins(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+      );
 }

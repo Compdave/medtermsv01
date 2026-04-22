@@ -15,6 +15,7 @@ import 'package:medtermsv01/shared/bottom_sheets/scoring_bottom_sheet.dart';
 import 'package:medtermsv01/core/config/app_config.dart';
 import 'package:medtermsv01/core/theme/app_theme.dart';
 import 'package:medtermsv01/features/home/screens/app_drawer.dart';
+import 'package:medtermsv01/core/services/module_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final bool isGuest;
@@ -33,6 +34,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void initState() {
     super.initState();
     _loadTimerPref();
+    _ensureModulesSeeded();
+  }
+
+  Future<void> _ensureModulesSeeded() async {
+    final userId = SupabaseService.currentUserId;
+    if (userId == null) return;
+    try {
+      await ModuleService.ensureAppModulesExist(
+        userId: userId,
+        appId: AppConfig.instance.appId,
+      );
+      ref.invalidate(moduleListProvider);
+    } catch (e) {
+      // Non-fatal — don't block home screen
+    }
   }
 
   Future<void> _loadTimerPref() async {
@@ -93,16 +109,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         elevation: 0,
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF2E9E7E),
-              Color(0xFFB2E8D8),
-              Color(0xFFD9F5ED),
+              Color.lerp(AppConfig.instance.gradientTop,
+                  AppConfig.instance.gradientBottom, 0.2)!,
+              Color.lerp(AppConfig.instance.gradientTop,
+                  AppConfig.instance.gradientBottom, 0.6)!,
+              AppConfig.instance.gradientBottom,
             ],
-            stops: [0.0, 0.5, 1.0],
+            stops: const [0.0, 0.5, 1.0],
           ),
         ),
         child: userAsync.when(
@@ -162,7 +180,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           child: ClipOval(
             child: Image.asset(
-              'assets/icons/app_launcher_icon.png',
+              AppConfig.instance.iconAssetPath,
               fit: BoxFit.cover,
             ),
           ),
@@ -258,7 +276,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Ready to learn and review medical terms?',
+            'Ready to learn and review?',
             style: TextStyle(
               fontSize: 13,
               color: Color(0xFF1A3A2A),
@@ -307,11 +325,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         builder: (ctx, setDialogState) => AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
+          title: Row(
             children: [
               Icon(Icons.timer_outlined, color: AppColors.primary, size: 24),
-              SizedBox(width: 8),
-              Text('Quiz Timer'),
+              const SizedBox(width: 8),
+              const Text('Quiz Timer'),
             ],
           ),
           content: Column(
@@ -538,8 +556,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final subtitle = hasPurchasedModule
         ? 'Switch your active module'
         : 'Get Access to the full module';
-    final buttonLabel =
-        hasPurchasedModule ? 'Change Module' : 'Select Module';
+    final buttonLabel = hasPurchasedModule ? 'Change Module' : 'Select Module';
     final icon = hasPurchasedModule
         ? Icons.swap_horiz_rounded
         : Icons.lock_outline_rounded;
@@ -592,8 +609,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               child: Text(
                 buttonLabel,
-                style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.w600),
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -796,8 +813,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 12),
               ...unlocked.map((m) => ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.quiz_outlined,
-                        color: AppColors.primary),
+                    leading:
+                        Icon(Icons.quiz_outlined, color: AppColors.primary),
                     title: Text(
                       m['quiz_name'] as String? ?? 'Module',
                       style: const TextStyle(fontSize: 15),

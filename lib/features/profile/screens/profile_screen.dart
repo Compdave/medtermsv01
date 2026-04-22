@@ -70,8 +70,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
       body: userAsync.when(
-        loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.primary)),
+        loading: () =>
+            Center(child: CircularProgressIndicator(color: AppColors.primary)),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (user) {
           // Pre-fill display name on first load
@@ -105,12 +105,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             AppColors.primary,
-            Color(0xFF2E9E7E),
+            const Color(0xFF2E9E7E),
           ],
         ),
         borderRadius: BorderRadius.circular(20),
@@ -184,7 +184,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
             decoration: InputDecoration(
               labelText: 'Display Name',
-              labelStyle: const TextStyle(color: AppColors.primary),
+              labelStyle: TextStyle(color: AppColors.primary),
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.95),
               border: OutlineInputBorder(
@@ -215,7 +215,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 elevation: 0,
               ),
               child: _isSavingName
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
@@ -369,7 +369,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
         suffixIcon: toggleObscure != null
             ? IconButton(

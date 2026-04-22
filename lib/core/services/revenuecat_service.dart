@@ -1,11 +1,11 @@
 // ignore_for_file: unused_local_variable
 
 import 'package:flutter/foundation.dart';
+import 'package:medtermsv01/core/config/app_config.dart';
 // lib/core/services/revenuecat_service.dart
 
 import 'dart:io';
 import 'package:purchases_flutter/purchases_flutter.dart';
-import 'package:medtermsv01/core/config/app_secrets.dart';
 import 'package:medtermsv01/core/services/module_service.dart';
 
 /// Handles all RevenueCat operations — initialization, offerings, purchase,
@@ -25,8 +25,8 @@ class RevenueCatService {
 
     final configuration = PurchasesConfiguration(
       Platform.isIOS
-          ? AppSecrets.revenueCatAppleApiKey
-          : AppSecrets.revenueCatGoogleApiKey,
+          ? AppConfig.instance.revenueCatAppleApiKey
+          : AppConfig.instance.revenueCatGoogleApiKey,
     )..appUserID = userId;
 
     await Purchases.configure(configuration);

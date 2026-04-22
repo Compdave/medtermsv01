@@ -20,8 +20,7 @@ class NewPasswordBottomSheet extends StatefulWidget {
   }
 
   @override
-  State<NewPasswordBottomSheet> createState() =>
-      _NewPasswordBottomSheetState();
+  State<NewPasswordBottomSheet> createState() => _NewPasswordBottomSheetState();
 }
 
 class _NewPasswordBottomSheetState extends State<NewPasswordBottomSheet> {
@@ -54,8 +53,8 @@ class _NewPasswordBottomSheetState extends State<NewPasswordBottomSheet> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password updated successfully!'),
+          SnackBar(
+            content: const Text('Password updated successfully!'),
             backgroundColor: AppColors.primary,
             behavior: SnackBarBehavior.floating,
           ),
@@ -168,18 +167,16 @@ class _NewPasswordBottomSheetState extends State<NewPasswordBottomSheet> {
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFB2D8CE)),
+                    borderSide: const BorderSide(color: Color(0xFFB2D8CE)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFB2D8CE)),
+                    borderSide: const BorderSide(color: Color(0xFFB2D8CE)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                        color: AppColors.primary, width: 1.5),
+                    borderSide:
+                        BorderSide(color: AppColors.primary, width: 1.5),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -189,8 +186,7 @@ class _NewPasswordBottomSheetState extends State<NewPasswordBottomSheet> {
                       color: Colors.grey.shade500,
                       size: 20,
                     ),
-                    onPressed: () =>
-                        setState(() => _obscure = !_obscure),
+                    onPressed: () => setState(() => _obscure = !_obscure),
                   ),
                   counterText: '$_charCount/$_maxLength',
                   counterStyle: TextStyle(
@@ -199,8 +195,8 @@ class _NewPasswordBottomSheetState extends State<NewPasswordBottomSheet> {
                         ? Colors.red
                         : Colors.grey.shade500,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
               const SizedBox(height: 20),
@@ -231,8 +227,7 @@ class _NewPasswordBottomSheetState extends State<NewPasswordBottomSheet> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: _isSaving
                           ? const SizedBox(

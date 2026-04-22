@@ -40,7 +40,7 @@ class LeaderboardScreen extends ConsumerWidget {
           _buildHeader(),
           Expanded(
             child: leadersAsync.when(
-              loading: () => const Center(
+              loading: () => Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               ),
               error: (e, _) => Center(

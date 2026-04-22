@@ -114,7 +114,7 @@ class App extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline_rounded,
+              Icon(Icons.error_outline_rounded,
                   size: 64, color: AppColors.primary),
               const SizedBox(height: 16),
               Text(

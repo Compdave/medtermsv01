@@ -31,7 +31,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
   );
 
   final _questJumpController = TextEditingController();
-  bool _showRationale = false;
+//  bool _showRationale = false;
 
   // ---------------------------------------------------------------------------
   // Answer Button Color Logic
@@ -83,11 +83,10 @@ class _QuestPageState extends ConsumerState<QuestPage> {
         if (didPop) notifier.saveSessionAndExit();
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF0FAF7),
+        backgroundColor: AppColors.scaffoldBackground,
         appBar: _buildAppBar(session, notifier),
         body: session.isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: AppColors.primary))
+            ? Center(child: CircularProgressIndicator(color: AppColors.primary))
             : session.error != null
                 ? _buildError(session.error!)
                 : _buildBody(session, notifier),
@@ -172,7 +171,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
                 onTap: () {
                   notifier.switchMode(QuizMode.allQuestions);
                   Navigator.pop(context);
-                  setState(() => _showRationale = false);
+//                  setState(() => _showRationale = false);
                 },
               ),
               _modeOption(
@@ -184,7 +183,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
                 onTap: () {
                   notifier.switchMode(QuizMode.firstChance);
                   Navigator.pop(context);
-                  setState(() => _showRationale = false);
+//                  setState(() => _showRationale = false);
                 },
               ),
               _modeOption(
@@ -196,7 +195,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
                 onTap: () {
                   notifier.switchMode(QuizMode.secondChance);
                   Navigator.pop(context);
-                  setState(() => _showRationale = false);
+//                  setState(() => _showRationale = false);
                 },
               ),
             ],
@@ -244,8 +243,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
         ),
       ),
       trailing: isSelected
-          ? const Icon(Icons.check_circle_rounded,
-              color: AppColors.primary, size: 22)
+          ? Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 22)
           : null,
       onTap: onTap,
     );
@@ -340,7 +338,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
     return LinearProgressIndicator(
       value: progress,
       backgroundColor: Colors.white.withValues(alpha: 0.3),
-      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
+      valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
       minHeight: 4,
     );
   }
@@ -565,61 +563,113 @@ class _QuestPageState extends ConsumerState<QuestPage> {
   // ---------------------------------------------------------------------------
 
   Widget _buildRationaleSection(String rationale) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        GestureDetector(
-          onTap: () => setState(() => _showRationale = !_showRationale),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-              border:
-                  Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+    return GestureDetector(
+      onTap: () => _showRationaleModal(rationale),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Rationale',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
+              ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Icon(Icons.info_outline_rounded, color: AppColors.primary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRationaleModal(String rationale) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Header
+            Row(
               children: [
+                Icon(Icons.info_outline_rounded,
+                    color: AppColors.primary, size: 20),
+                const SizedBox(width: 8),
                 const Text(
                   'Rationale',
                   style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0D2B24),
                   ),
-                ),
-                Icon(
-                  _showRationale
-                      ? Icons.keyboard_arrow_up_rounded
-                      : Icons.keyboard_arrow_down_rounded,
-                  color: AppColors.primary,
                 ),
               ],
             ),
-          ),
-        ),
-        if (_showRationale) ...[
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border:
-                  Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-            ),
-            child: Text(
-              rationale,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF0D2B24),
-                height: 1.5,
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+            // Rationale text — scrollable for long text
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  rationale,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF0D2B24),
+                    height: 1.6,
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
-      ],
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text('Close',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -660,7 +710,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
                       ? null
                       : () {
                           notifier.selectAnswer(0);
-                          setState(() => _showRationale = false);
+//                          setState(() => _showRationale = false);
                         },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
@@ -687,7 +737,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
                           session.isSubmitting
                       ? null
                       : () async {
-                          setState(() => _showRationale = false);
+//                          setState(() => _showRationale = false);
                           await notifier.submitAnswer();
                         },
                   style: ElevatedButton.styleFrom(
@@ -728,7 +778,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFE0F4EE),
+        color: AppColors.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
@@ -806,7 +856,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
         final n = int.tryParse(value);
         if (n != null && n >= 1 && n <= session.totalInQueue) {
           notifier.goToPosition(n);
-          setState(() => _showRationale = false);
+//          setState(() => _showRationale = false);
         }
         _questJumpController.clear();
       },

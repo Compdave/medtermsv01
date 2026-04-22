@@ -41,7 +41,7 @@ class ModulesListScreen extends ConsumerWidget {
         centerTitle: true,
       ),
       body: moduleListAsync.when(
-        loading: () => const Center(
+        loading: () => Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
         error: (e, _) => Center(child: Text('Error loading modules: $e')),
@@ -101,10 +101,10 @@ class ModulesListScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 18),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               'Tap an unlocked module to make it your active working module.',
@@ -123,7 +123,7 @@ class ModulesListScreen extends ConsumerWidget {
   Widget _sectionHeader(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
         fontWeight: FontWeight.w700,
         color: AppColors.primary,
@@ -371,7 +371,7 @@ class _ModuleCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 6),
-                            const Icon(Icons.chevron_right_rounded,
+                            Icon(Icons.chevron_right_rounded,
                                 color: AppColors.primary, size: 22),
                           ],
                         )
@@ -401,13 +401,13 @@ class _ModuleCard extends StatelessWidget {
                     children: [
                       Text(
                         price,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: AppColors.primary,
                         ),
                       ),
-                      const Icon(Icons.chevron_right_rounded,
+                      Icon(Icons.chevron_right_rounded,
                           color: AppColors.primary, size: 18),
                     ],
                   ),

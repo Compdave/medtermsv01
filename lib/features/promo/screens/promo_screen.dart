@@ -92,8 +92,9 @@ class _PromoScreenState extends ConsumerState<PromoScreen> {
     ref.invalidate(moduleListProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Purchase complete! Your module is being unlocked...'),
+        SnackBar(
+          content:
+              const Text('Purchase complete! Your module is being unlocked...'),
           backgroundColor: AppColors.primary,
           behavior: SnackBarBehavior.floating,
         ),
@@ -147,12 +148,12 @@ class _PromoScreenState extends ConsumerState<PromoScreen> {
           if (_isLoading)
             Container(
               color: const Color(0xFFF0FAF7),
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircularProgressIndicator(color: AppColors.primary),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       'Loading checkout...',
                       style: TextStyle(

@@ -15,29 +15,24 @@ import 'package:medtermsv01/core/services/version_service.dart';
 import 'package:medtermsv01/core/providers/providers.dart';
 import 'package:medtermsv01/core/theme/app_theme.dart';
 import 'package:medtermsv01/shared/bottom_sheets/upgrade_option_bottom_sheet.dart';
+import 'package:medtermsv01/core/config/app_config.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
-
-  static const _faqUrl = 'https://reichardreviews.com/faq';
-  static const _appStoreUrl =
-      'https://apps.apple.com/us/app/medical-terminology-app/id6752959809';
-  static const _playStoreUrl =
-      'https://play.google.com/store/apps/details?id=com.reichardreviews.medterms';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Drawer(
       backgroundColor: Colors.transparent,
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1A6B5A),
-              Color(0xFF2E9E7E),
-              Color(0xFF3CC9A0),
+              AppColors.primaryDark,
+              AppColors.primary,
+              AppColors.primaryLight,
             ],
           ),
         ),
@@ -48,7 +43,7 @@ class AppDrawer extends ConsumerWidget {
               _drawerItem(
                 icon: Icons.settings_outlined,
                 label: 'FAQ',
-                onTap: () => _launchUrl(_faqUrl, context),
+                onTap: () => _launchUrl(AppConfig.instance.faqUrl, context),
               ),
               _drawerItem(
                 icon: Icons.refresh_rounded,
@@ -227,6 +222,7 @@ class AppDrawer extends ConsumerWidget {
         return;
       }
       await UserService.deleteUserData(email: user!.email!);
+      await AuthService.signOut();
       if (context.mounted) context.go('/login');
     } catch (e) {
       if (context.mounted) _showSnack(context, 'Delete failed: $e');

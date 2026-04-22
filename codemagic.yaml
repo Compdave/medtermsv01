@@ -1,15 +1,23 @@
 # codemagic.yaml
-# Codemagic CI/CD configuration for medtermsv01
-# Builds iOS IPA and submits to App Store Connect TestFlight
+# Codemagic CI/CD configuration for reichardreviews
+# 4 workflows:
+#   medterms-ios-release     → MedTerms iOS    → App Store (id: 6752959809)
+#   medterms-android-release → MedTerms Android → Play Store (com.reichardreviews.medterms)
+#   teas-ios-release         → TEAS iOS        → App Store (id: 6762864989)
+#   teas-android-release     → TEAS Android    → Play Store (com.reichardreviews.teassci26)
 
 workflows:
-  ios-release:
-    name: iOS Release
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MEDTERMS — iOS
+# ─────────────────────────────────────────────────────────────────────────────
+  medterms-ios-release:
+    name: MedTerms iOS Release
     max_build_duration: 60
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: Codemagic  # Name of your ASC integration in CM settings
+      app_store_connect: Codemagic
 
     environment:
       groups:
@@ -29,8 +37,41 @@ workflows:
         script: |
           mkdir -p lib/core/config
           echo "$APP_SECRETS_DART" > lib/core/config/app_secrets.dart
+
+      - name: Swap AndroidManifest label → MedTerms
+        script: |
+          sed -i 's/android:label="[^"]*"/android:label="medtermsv01"/' \
+            android/app/src/main/AndroidManifest.xml
+
+      - name: Swap flutter_icons → MedTerms
+        script: |
+          python3 - <<'EOF'
+          import re
+          with open('pubspec.yaml', 'r') as f:
+              content = f.read()
+          content = re.sub(
+              r'(flutter_icons:.*?image_path:\s*")[^"]*(")',
+              r'\g<1>assets/icons/app_launcher_icon.png\2',
+              content, flags=re.DOTALL
+          )
+          content = re.sub(
+              r'(adaptive_icon_background:\s*")[^"]*(")',
+              r'\g<1>#1A6B5A\2', content
+          )
+          content = re.sub(
+              r'(adaptive_icon_foreground:\s*")[^"]*(")',
+              r'\g<1>assets/icons/app_launcher_icon.png\2', content
+          )
+          with open('pubspec.yaml', 'w') as f:
+              f.write(content)
+          print('pubspec.yaml updated for MedTerms')
+          EOF
+
       - name: Get Flutter packages
         script: flutter pub get
+
+      - name: Generate launcher icons
+        script: dart run flutter_launcher_icons
 
       - name: Install CocoaPods
         script: |
@@ -41,18 +82,16 @@ workflows:
         script: |
           xcode-project use-profiles
           flutter build ipa --release \
+            --target lib/main.dart \
             --export-options-plist=/Users/builder/export_options.plist
-          
-          # Patch MinimumOSVersion in App.framework inside the archive
-          # (patch the xcarchive BEFORE IPA export, avoids re-signing)
+
           ARCHIVE="build/ios/archive/Runner.xcarchive"
           PLIST="$ARCHIVE/Products/Applications/Runner.app/Frameworks/App.framework/Info.plist"
           if [ -f "$PLIST" ]; then
             /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 13.0" "$PLIST" 2>/dev/null || \
             /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 13.0" "$PLIST"
           fi
-          
-          # Re-export IPA from patched archive
+
           xcodebuild -exportArchive \
             -archivePath "$ARCHIVE" \
             -exportOptionsPlist /Users/builder/export_options.plist \
@@ -70,25 +109,253 @@ workflows:
         beta_groups:
           - Internal Testers
 
-  android-release:
-    name: Android Release
+
+# ─────────────────────────────────────────────────────────────────────────────
+# MEDTERMS — Android
+# ─────────────────────────────────────────────────────────────────────────────
+  medterms-android-release:
+    name: MedTerms Android Release
     max_build_duration: 60
     instance_type: linux_x2
 
     environment:
+      groups:
+        - secrets
       flutter: 3.29.3
       android_signing:
-        - medtermsv01_keystore  # Name of keystore credential in CM settings
+        - medtermsv01_keystore
       vars:
         PACKAGE_NAME: "com.reichardreviews.medterms"
 
     scripts:
+      - name: Create app_secrets.dart
+        script: |
+          mkdir -p lib/core/config
+          echo "$APP_SECRETS_DART" > lib/core/config/app_secrets.dart
+
+      - name: Swap applicationId → MedTerms
+        script: |
+          sed -i 's/applicationId = "[^"]*"/applicationId = "com.reichardreviews.medterms"/' \
+            android/app/build.gradle.kts
+
+      - name: Swap AndroidManifest label → MedTerms
+        script: |
+          sed -i 's/android:label="[^"]*"/android:label="medtermsv01"/' \
+            android/app/src/main/AndroidManifest.xml
+
+      - name: Swap flutter_icons → MedTerms
+        script: |
+          python3 - <<'EOF'
+          import re
+          with open('pubspec.yaml', 'r') as f:
+              content = f.read()
+          content = re.sub(
+              r'(flutter_icons:.*?image_path:\s*")[^"]*(")',
+              r'\g<1>assets/icons/app_launcher_icon.png\2',
+              content, flags=re.DOTALL
+          )
+          content = re.sub(
+              r'(adaptive_icon_background:\s*")[^"]*(")',
+              r'\g<1>#1A6B5A\2', content
+          )
+          content = re.sub(
+              r'(adaptive_icon_foreground:\s*")[^"]*(")',
+              r'\g<1>assets/icons/app_launcher_icon.png\2', content
+          )
+          with open('pubspec.yaml', 'w') as f:
+              f.write(content)
+          print('pubspec.yaml updated for MedTerms')
+          EOF
+
       - name: Get Flutter packages
         script: flutter pub get
 
+      - name: Generate launcher icons
+        script: dart run flutter_launcher_icons
+
       - name: Build Android release AAB
         script: |
-          flutter build appbundle --release
+          flutter build appbundle --release \
+            --target lib/main.dart
+
+    artifacts:
+      - build/app/outputs/bundle/release/app-release.aab
+
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TEAS — iOS
+# ─────────────────────────────────────────────────────────────────────────────
+  teas-ios-release:
+    name: TEAS iOS Release
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    integrations:
+      app_store_connect: Codemagic
+
+    environment:
+      groups:
+        - secrets
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.reichardreviews.teassci26
+      flutter: 3.29.3
+      xcode: 16.2
+      cocoapods: default
+      vars:
+        APP_STORE_APP_ID: "6762864989"
+        IPHONEOS_DEPLOYMENT_TARGET: "13.0"
+
+    scripts:
+      - name: Create app_secrets.dart
+        script: |
+          mkdir -p lib/core/config
+          echo "$APP_SECRETS_DART" > lib/core/config/app_secrets.dart
+
+      - name: Swap AndroidManifest label → TEAS
+        script: |
+          sed -i 's/android:label="[^"]*"/android:label="TEAS Science Q\&A 2026"/' \
+            android/app/src/main/AndroidManifest.xml
+
+      - name: Swap flutter_icons → TEAS
+        script: |
+          python3 - <<'EOF'
+          import re
+          with open('pubspec.yaml', 'r') as f:
+              content = f.read()
+          content = re.sub(
+              r'(flutter_icons:.*?image_path:\s*")[^"]*(")',
+              r'\g<1>assets/icons/app_launcher_icon_TEAS.png\2',
+              content, flags=re.DOTALL
+          )
+          content = re.sub(
+              r'(adaptive_icon_background:\s*")[^"]*(")',
+              r'\g<1>#3D6491\2', content
+          )
+          content = re.sub(
+              r'(adaptive_icon_foreground:\s*")[^"]*(")',
+              r'\g<1>assets/icons/app_launcher_icon_TEAS.png\2', content
+          )
+          with open('pubspec.yaml', 'w') as f:
+              f.write(content)
+          print('pubspec.yaml updated for TEAS')
+          EOF
+
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Generate launcher icons
+        script: dart run flutter_launcher_icons
+
+      - name: Install CocoaPods
+        script: |
+          cd ios
+          pod install
+
+      - name: Build iOS release
+        script: |
+          xcode-project use-profiles
+          flutter build ipa --release \
+            --target lib/main_teas.dart \
+            --export-options-plist=/Users/builder/export_options.plist
+
+          ARCHIVE="build/ios/archive/Runner.xcarchive"
+          PLIST="$ARCHIVE/Products/Applications/Runner.app/Frameworks/App.framework/Info.plist"
+          if [ -f "$PLIST" ]; then
+            /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 13.0" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 13.0" "$PLIST"
+          fi
+
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE" \
+            -exportOptionsPlist /Users/builder/export_options.plist \
+            -exportPath build/ios/ipa \
+            -allowProvisioningUpdates
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TEAS — Android
+# ─────────────────────────────────────────────────────────────────────────────
+  teas-android-release:
+    name: TEAS Android Release
+    max_build_duration: 60
+    instance_type: linux_x2
+
+    environment:
+      groups:
+        - secrets
+      flutter: 3.29.3
+      android_signing:
+        - medtermsv01_keystore
+      vars:
+        PACKAGE_NAME: "com.reichardreviews.teassci26"
+
+    scripts:
+      - name: Create app_secrets.dart
+        script: |
+          mkdir -p lib/core/config
+          echo "$APP_SECRETS_DART" > lib/core/config/app_secrets.dart
+
+      - name: Swap applicationId → TEAS
+        script: |
+          sed -i 's/applicationId = "[^"]*"/applicationId = "com.reichardreviews.teassci26"/' \
+            android/app/build.gradle.kts
+
+      - name: Swap AndroidManifest label → TEAS
+        script: |
+          sed -i 's/android:label="[^"]*"/android:label="TEAS Science Q\&A 2026"/' \
+            android/app/src/main/AndroidManifest.xml
+
+      - name: Swap flutter_icons → TEAS
+        script: |
+          python3 - <<'EOF'
+          import re
+          with open('pubspec.yaml', 'r') as f:
+              content = f.read()
+          content = re.sub(
+              r'(flutter_icons:.*?image_path:\s*")[^"]*(")',
+              r'\g<1>assets/icons/app_launcher_icon_TEAS.png\2',
+              content, flags=re.DOTALL
+          )
+          content = re.sub(
+              r'(adaptive_icon_background:\s*")[^"]*(")',
+              r'\g<1>#3D6491\2', content
+          )
+          content = re.sub(
+              r'(adaptive_icon_foreground:\s*")[^"]*(")',
+              r'\g<1>assets/icons/app_launcher_icon_TEAS.png\2', content
+          )
+          with open('pubspec.yaml', 'w') as f:
+              f.write(content)
+          print('pubspec.yaml updated for TEAS')
+          EOF
+
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Generate launcher icons
+        script: dart run flutter_launcher_icons
+
+      - name: Build Android release AAB
+        script: |
+          flutter build appbundle --release \
+            --target lib/main_teas.dart
 
     artifacts:
       - build/app/outputs/bundle/release/app-release.aab

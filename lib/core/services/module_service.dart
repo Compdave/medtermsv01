@@ -114,4 +114,33 @@ class ModuleService {
       },
     );
   }
+
+  static Future<void> ensureAppModulesExist({
+    required String userId,
+    required int appId,
+  }) async {
+    final quizList = await _client
+        .from('quiz')
+        .select()
+        .eq('app_id', appId)
+        .order('quiz_id');
+
+    for (final quiz in quizList as List) {
+      final isSample = quiz['sample'] as bool? ?? false;
+      if (!isSample) continue; // ← skip paid modules entirely
+
+      final quizId = quiz['quiz_id'] as int;
+      final apptype = quiz['apptype'] as String? ?? '';
+
+      final hasIt = await hasModule(userId: userId, quizId: quizId);
+      if (hasIt) continue; // ← already seeded, skip
+
+      // Only reaches here if: sample AND not yet seeded
+      await unlockModule(
+        apptype: apptype,
+        userId: userId,
+        quizId: quizId,
+      );
+    }
+  }
 }

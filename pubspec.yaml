@@ -16,7 +16,7 @@ dependencies:
 
   # ── LemonSqueezy (web purchases) ─────────────────────────
   url_launcher: ^6.3.0              # Opens LemonSqueezy checkout URL in browser
-  purchases_flutter: ^9.15.1
+  purchases_flutter: ^10.0.1
 
   # ── State Management ─────────────────────────────────────
   flutter_riverpod: ^2.5.1          # Riverpod state management
@@ -55,6 +55,7 @@ dependencies:
   equatable: ^2.0.5                 # Value equality for models
   uuid: ^4.4.0                      # Generate UUIDs if needed client-side
   collection: ^1.18.0               # Extended collection utilities
+  purchases_ui_flutter: ^10.0.1
 
 dev_dependencies:
   flutter_test:
@@ -66,12 +67,16 @@ dev_dependencies:
   riverpod_lint: ^2.3.10
 
 
+  # FLAVOR: swap image_path and background per build
+  # MedTerms: image_path: "assets/icons/app_launcher_icon.png", background: "#1A6B5A"
+  # TEAS:     image_path: "assets/icons/app_launcher_icon_TEAS.png", background: "#1A3A6B"
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/icons/app_launcher_icon.png"
   adaptive_icon_background: "#1A6B5A"
-  adaptive_icon_foreground: "assets/icons/app_launcher_icon.png"  
+  adaptive_icon_foreground: "assets/icons/app_launcher_icon.png"
+
 
 flutter:
   uses-material-design: true
@@ -80,7 +85,7 @@ flutter:
 
   assets:
     - assets/images/                # App logo, module artwork
-    - assets/icons/app_launcher_icon.png                 # Custom icons if needed
+    - assets/icons/                 # Custom icons if needed
     - assets/animations/            # Lottie JSON files (score screen etc.)
 
   # fonts:                          # Uncomment if using local fonts

@@ -44,14 +44,12 @@ class ScoringBottomSheet extends StatelessWidget {
   // Computed stats
   // ---------------------------------------------------------------------------
 
-  double get _pctCompleted =>
-      noInQuiz > 0 ? (noCompleted / noInQuiz) * 100 : 0;
+  double get _pctCompleted => noInQuiz > 0 ? (noCompleted / noInQuiz) * 100 : 0;
 
   double get _pctCorrect =>
       noCompleted > 0 ? (noCorrect / noCompleted) * 100 : 0;
 
-  double get _secPerItem =>
-      noCorrect > 0 ? durationSeconds / noCorrect : 0;
+  double get _secPerItem => noCorrect > 0 ? durationSeconds / noCorrect : 0;
 
   // ---------------------------------------------------------------------------
   // Build
@@ -62,12 +60,12 @@ class ScoringBottomSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF1A6B5A),
-            Color(0xFF2E9E7E),
+            AppColors.primaryDark,
+            AppColors.primary,
           ],
         ),
         borderRadius: BorderRadius.circular(24),

@@ -74,7 +74,7 @@ class UpgradeOptionBottomSheet extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.system_update_rounded,
                 color: AppColors.primary,
                 size: 30,
@@ -202,8 +202,7 @@ class _StoreButton extends StatelessWidget {
               const Icon(Icons.play_arrow_rounded,
                   color: Colors.white, size: 28)
             else
-              const Icon(Icons.apple_rounded,
-                  color: Colors.white, size: 28),
+              const Icon(Icons.apple_rounded, color: Colors.white, size: 28),
             const SizedBox(width: 8),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,

@@ -35,8 +35,7 @@ class NewEmailBottomSheet extends StatefulWidget {
   }
 
   @override
-  State<NewEmailBottomSheet> createState() =>
-      _NewEmailBottomSheetState();
+  State<NewEmailBottomSheet> createState() => _NewEmailBottomSheetState();
 }
 
 class _NewEmailBottomSheetState extends State<NewEmailBottomSheet> {
@@ -70,8 +69,8 @@ class _NewEmailBottomSheetState extends State<NewEmailBottomSheet> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email updated successfully!'),
+          SnackBar(
+            content: const Text('Email updated successfully!'),
             backgroundColor: AppColors.primary,
             behavior: SnackBarBehavior.floating,
           ),
@@ -155,8 +154,8 @@ class _NewEmailBottomSheetState extends State<NewEmailBottomSheet> {
               // Current email display
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -191,21 +190,19 @@ class _NewEmailBottomSheetState extends State<NewEmailBottomSheet> {
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFB2D8CE)),
+                    borderSide: const BorderSide(color: Color(0xFFB2D8CE)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide:
-                        const BorderSide(color: Color(0xFFB2D8CE)),
+                    borderSide: const BorderSide(color: Color(0xFFB2D8CE)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                        color: AppColors.primary, width: 1.5),
+                    borderSide:
+                        BorderSide(color: AppColors.primary, width: 1.5),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 14),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
               ),
               const SizedBox(height: 20),
@@ -236,8 +233,7 @@ class _NewEmailBottomSheetState extends State<NewEmailBottomSheet> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: _isSaving
                           ? const SizedBox(

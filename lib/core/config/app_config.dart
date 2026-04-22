@@ -27,6 +27,12 @@ class AppConfig {
   /// Accent/action color for this flavor.
   final Color accentColor;
 
+  /// Top color of the login/home background gradient.
+  final Color gradientTop;
+
+  /// Bottom color of the login/home background gradient.
+  final Color gradientBottom;
+
   /// Path to this flavor's launcher icon asset.
   final String iconAssetPath;
 
@@ -39,6 +45,12 @@ class AppConfig {
   /// FAQ web page URL for this flavor.
   final String faqUrl;
 
+  /// RevenueCat Apple API key for this flavor.
+  final String revenueCatAppleApiKey;
+
+  /// RevenueCat Google API key for this flavor.
+  final String revenueCatGoogleApiKey;
+
   const AppConfig({
     required this.appName,
     required this.appSubtitle,
@@ -46,10 +58,14 @@ class AppConfig {
     required this.apptypePrefix,
     required this.primaryColor,
     required this.accentColor,
+    required this.gradientTop,
+    required this.gradientBottom,
     required this.iconAssetPath,
     required this.appStoreUrl,
     required this.playStoreUrl,
     required this.faqUrl,
+    required this.revenueCatAppleApiKey,
+    required this.revenueCatGoogleApiKey,
   });
 
   /// Global singleton — set once at app startup in main_<flavor>.dart.

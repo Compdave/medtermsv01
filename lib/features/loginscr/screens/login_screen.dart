@@ -1,13 +1,16 @@
 // lib/features/loginscr/screens/login_screen.dart
 
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medtermsv01/core/services/auth_service.dart';
+import 'package:medtermsv01/core/services/revenuecat_service.dart';
+import 'dart:io';
 import 'package:medtermsv01/core/services/module_service.dart';
 import 'package:medtermsv01/core/services/quiz_service.dart';
 import 'package:medtermsv01/core/services/user_service.dart';
-import 'package:medtermsv01/core/config/app_secrets.dart';
 import 'package:medtermsv01/core/config/app_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -47,7 +50,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     try {
       if (_isSignIn) {
-        await AuthService.signIn(email: email, password: password);
+        final response =
+            await AuthService.signIn(email: email, password: password);
+        // Log in to RevenueCat with Supabase user ID
+        if (Platform.isIOS || Platform.isAndroid) {
+          final userId = response.user?.id;
+          if (userId != null) await RevenueCatService.logIn(userId);
+        }
         if (mounted) context.go('/home');
       } else {
         await _handleSignUp(
@@ -148,21 +157,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _continueAsGuest() async {
-    setState(() => _isLoading = true);
-    try {
-      await AuthService.signIn(
-        email: AppSecrets.guestEmail,
-        password: AppSecrets.guestPassword,
-      );
-      if (mounted) context.go('/home');
-    } catch (e) {
-      if (mounted) _showSnack(e.toString());
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
   void _showSnack(String message, {bool isError = true}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -188,19 +182,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('LOGIN gradientTop: ${AppConfig.instance.gradientTop}');
+    debugPrint('LOGIN appName: ${AppConfig.instance.appName}');
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1A6B5A), // AppColors.primary — deep forest green
-              Color(0xFF2E9E7E), // mid teal
-              Color(0xFFD4EFE8), // light mint
-              Color(0xFFF0FAF7), // near white
+              AppConfig.instance.gradientTop,
+              Color.lerp(AppConfig.instance.gradientTop,
+                  AppConfig.instance.gradientBottom, 0.3)!,
+              AppConfig.instance.gradientBottom,
+              const Color(0xFFF8FAFC),
             ],
-            stops: [0.0, 0.3, 0.7, 1.0],
+            stops: const [0.0, 0.3, 0.7, 1.0],
           ),
         ),
         child: SafeArea(
@@ -223,10 +220,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   if (_isSignIn) ...[
                     const SizedBox(height: 12),
                     _buildForgotPassword(),
-                    const SizedBox(height: 20),
-                    _buildOrDivider(),
-                    const SizedBox(height: 16),
-                    _buildGuestButton(),
                   ],
                   const SizedBox(height: 32),
                   _buildFooter(),
@@ -261,7 +254,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       child: ClipOval(
         child: Image.asset(
-          'assets/icons/app_launcher_icon.png',
+          AppConfig.instance.iconAssetPath, // ← flavor-aware icon
           fit: BoxFit.cover,
         ),
       ),
@@ -269,9 +262,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget _buildTitle() {
-    return const Text(
-      'Medical Terminology Vol 1',
-      style: TextStyle(
+    return Text(
+      AppConfig.instance.appName, // ← flavor-aware app name
+      style: const TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.w700,
         color: Color(0xFF0D2B24),
@@ -330,7 +323,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (!_isSignIn) ...[
           _buildTextField(
             controller: _displayNameController,
-            hint: 'Display name...',
+            hint: 'Display names...',
             icon: Icons.person_outline,
             validator: (v) =>
                 v == null || v.trim().isEmpty ? 'Display name required' : null,
@@ -417,7 +410,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -478,52 +471,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildOrDivider() {
-    return Row(
-      children: [
-        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.6))),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            'Or',
-            style: TextStyle(
-              color: Color(0xFF0D2B24),
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.6))),
-      ],
-    );
-  }
-
-  Widget _buildGuestButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 54,
-      child: OutlinedButton(
-        onPressed: _continueAsGuest,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF0D2B24),
-          side: const BorderSide(color: Color(0xFF0D2B24), width: 1.5),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: Colors.white.withValues(alpha: 0.25),
-        ),
-        child: const Text(
-          'Continue as Guest',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
-  }
-
   Widget _buildFooter() {
     return Column(
       children: [
         Text(
-          'Medical Terminology Q&A',
+          AppConfig.instance.appSubtitle, // ← flavor-aware subtitle
           style: TextStyle(
             fontFamily: 'serif',
             fontSize: 18,
