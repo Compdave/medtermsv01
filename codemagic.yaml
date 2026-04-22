@@ -40,7 +40,7 @@ workflows:
 
       - name: Swap AndroidManifest label → MedTerms
         script: |
-          sed -i 's/android:label="[^"]*"/android:label="medtermsv01"/' \
+          sed -i '' 's/android:label="[^"]*"/android:label="medtermsv01"/' \
             android/app/src/main/AndroidManifest.xml
 
       - name: Swap flutter_icons → MedTerms
@@ -219,7 +219,7 @@ workflows:
 
       - name: Swap AndroidManifest label → TEAS
         script: |
-          sed -i 's/android:label="[^"]*"/android:label="TEAS Science Q\&A 2026"/' \
+          sed -i '' 's/android:label="[^"]*"/android:label="TEAS Science Q\&A 2026"/' \
             android/app/src/main/AndroidManifest.xml
 
       - name: Swap flutter_icons → TEAS
