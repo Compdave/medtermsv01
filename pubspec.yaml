@@ -1,7 +1,7 @@
 name: medtermsv01
 description: Medical Terminology Q&A App
 publish_to: 'none'
-version: 2.22.46+46
+version: 2.22.55+55
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -69,7 +69,7 @@ dev_dependencies:
 
   # FLAVOR: swap image_path and background per build
   # MedTerms: image_path: "assets/icons/app_launcher_icon.png", background: "#1A6B5A"
-  # TEAS:     image_path: "assets/icons/app_launcher_icon_TEAS.png", background: "#1A3A6B"
+  # TEAS:     image_path: "assets/icons/app_launcher_icon.png", background: "#1A3A6B"
 flutter_icons:
   android: true
   ios: true
