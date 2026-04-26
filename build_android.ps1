@@ -20,7 +20,7 @@ if ($flavor -eq "medterms") {
 
     # AndroidManifest.xml
     (Get-Content android\app\src\main\AndroidManifest.xml) `
-        -replace 'android:label="[^"]*"', 'android:label="medtermsv01"' `
+        -replace 'android:label="[^"]*"', 'android:label="Med Terms"' `
         | Set-Content android\app\src\main\AndroidManifest.xml
 
     # MainActivity.kt
@@ -57,7 +57,7 @@ if ($flavor -eq "medterms") {
 
     # AndroidManifest.xml
     (Get-Content android\app\src\main\AndroidManifest.xml) `
-        -replace 'android:label="[^"]*"', 'android:label="teassci26"' `
+        -replace 'android:label="[^"]*"', 'android:label="TEAS Science"' `
         | Set-Content android\app\src\main\AndroidManifest.xml
 
     # MainActivity.kt
@@ -95,7 +95,7 @@ Write-Host "Reverting to MedTerms defaults..." -ForegroundColor Yellow
     | Set-Content android\app\build.gradle.kts
 
 (Get-Content android\app\src\main\AndroidManifest.xml) `
-    -replace 'android:label="[^"]*"', 'android:label="medtermsv01"' `
+    -replace 'android:label="[^"]*"', 'android:label="Med Terms"' `
     | Set-Content android\app\src\main\AndroidManifest.xml
 
 if (-not (Test-Path $mainActivityMedterms)) {

@@ -16,8 +16,16 @@ class LeaderboardService {
 
   /// Fetch the top leaderboard entries from the leaders view.
   /// [limit] defaults to 20. Results are ordered by the view definition.
-  static Future<List<LeadersModel>> fetchLeaders({int limit = 20}) async {
-    final response = await _client.from('leaders').select().limit(limit);
+  /// [apptype] filters results to only show entries for the current app flavor.
+  static Future<List<LeadersModel>> fetchLeaders({
+    int limit = 20,
+    required String apptype,
+  }) async {
+    final response = await _client
+        .from('leaders')
+        .select()
+        .eq('apptype', apptype)
+        .limit(limit);
 
     return (response as List)
         .map((e) => LeadersModel.fromJson(e as Map<String, dynamic>))
@@ -32,14 +40,16 @@ class LeaderboardService {
   /// If the user already has an entry it is updated in place.
   /// If not, a new row is inserted.
   /// [secPerItem] is the average seconds per question (lower = better).
+  /// [apptype] identifies which app flavor this score belongs to.
   /// Calls: update_or_insert_leaderboard(new_display_name, new_sec_per_item,
-  ///           new_no_of_items, new_no_correct, new_user_id)
+  ///           new_no_of_items, new_no_correct, new_user_id, new_apptype)
   static Future<void> submitScore({
     required String displayName,
     required double secPerItem,
     required int noOfItems,
     required int noCorrect,
     required String userId,
+    required String apptype,
   }) async {
     await _client.rpc(
       'update_or_insert_leaderboard',
@@ -49,6 +59,7 @@ class LeaderboardService {
         'new_no_of_items': noOfItems,
         'new_no_correct': noCorrect,
         'new_user_id': userId,
+        'new_apptype': apptype,
       },
     );
   }

@@ -13,6 +13,10 @@
 migrate_working_dir/
 .env
 lib/core/config/app_secrets.dart
+*.apks
+*.aab
+teas_universal*/
+aab-contents/
 
 # IntelliJ related
 *.iml

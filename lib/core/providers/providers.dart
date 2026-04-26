@@ -398,10 +398,14 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     }
   }
 
-  /// Save duration and update the quiz summary in one call.
+  // ---------------------------------------------------------------------------
+  // Save Session and Exit  (replaces existing saveSessionAndExit)
+  // ---------------------------------------------------------------------------
+
+  /// Save duration, update the quiz summary, and submit to leaderboard if eligible.
   /// Use this on intentional exit (back button, session complete).
   /// Runs with a timeout so back navigation never hangs the UI.
-  Future<void> saveSessionAndExit() async {
+  Future<void> saveSessionAndExit({String? displayName}) async {
     try {
       await Future.wait([
         saveAndResetTimer(),
@@ -413,7 +417,41 @@ class QuizSessionNotifier extends StateNotifier<QuizSessionState> {
     } catch (_) {
       // Non-fatal — always allow navigation even if save fails
     }
+
+    // Submit to leaderboard if user has enough correct answers
+    try {
+      final summary = await UserSummaryService.fetchUserSummary(
+        userId: _userId,
+        quizId: _quizId,
+      );
+      if (summary != null && summary.noCorrect >= 100) {
+        final secPerItem = summary.durationSeconds > 0 && summary.noCorrect > 0
+            ? summary.durationSeconds / summary.noCorrect
+            : 0.0;
+        await LeaderboardService.submitScore(
+          displayName: displayName ?? _userId,
+          secPerItem: secPerItem,
+          noOfItems: summary.noCompleted,
+          noCorrect: summary.noCorrect,
+          userId: _userId,
+          apptype: AppConfig.instance.apptypePrefix,
+        );
+      }
+    } catch (_) {
+      // Non-fatal — leaderboard failure should never block navigation
+    }
   }
+
+// =============================================================================
+// LEADERBOARD PROVIDERS  (replaces existing leadersProvider)
+// =============================================================================
+
+  /// Fetches the top leaderboard entries filtered by the current app flavor.
+  final leadersProvider = FutureProvider<List<LeadersModel>>((ref) async {
+    return LeaderboardService.fetchLeaders(
+      apptype: AppConfig.instance.apptypePrefix,
+    );
+  });
 
   // ---------------------------------------------------------------------------
   // Reset
@@ -461,9 +499,11 @@ final quizSessionProvider = StateNotifierProvider.family<QuizSessionNotifier,
 // LEADERBOARD PROVIDERS
 // =============================================================================
 
-/// Fetches the top leaderboard entries.
+/// Fetches the top leaderboard entries filtered by the current app flavor.
 final leadersProvider = FutureProvider<List<LeadersModel>>((ref) async {
-  return LeaderboardService.fetchLeaders();
+  return LeaderboardService.fetchLeaders(
+    apptype: AppConfig.instance.apptypePrefix,
+  );
 });
 
 // =============================================================================

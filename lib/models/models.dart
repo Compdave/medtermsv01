@@ -151,6 +151,7 @@ class LeaderboardModel {
   final int noOfItems;
   final int noCorrect;
   final String? userId;
+  final String? apptype;
 
   const LeaderboardModel({
     required this.id,
@@ -160,6 +161,7 @@ class LeaderboardModel {
     required this.noOfItems,
     required this.noCorrect,
     this.userId,
+    this.apptype,
   });
 
   factory LeaderboardModel.fromJson(Map<String, dynamic> json) {
@@ -171,6 +173,7 @@ class LeaderboardModel {
       noOfItems: json['no_of_items'] as int? ?? 0,
       noCorrect: json['no_correct'] as int? ?? 0,
       userId: json['user_id'] as String?,
+      apptype: json['apptype'] as String?,
     );
   }
 
@@ -182,6 +185,7 @@ class LeaderboardModel {
         'no_of_items': noOfItems,
         'no_correct': noCorrect,
         'user_id': userId,
+        'apptype': apptype,
       };
 
   LeaderboardModel copyWith({
@@ -192,6 +196,7 @@ class LeaderboardModel {
     int? noOfItems,
     int? noCorrect,
     String? userId,
+    String? apptype,
   }) {
     return LeaderboardModel(
       id: id ?? this.id,
@@ -201,6 +206,7 @@ class LeaderboardModel {
       noOfItems: noOfItems ?? this.noOfItems,
       noCorrect: noCorrect ?? this.noCorrect,
       userId: userId ?? this.userId,
+      apptype: apptype ?? this.apptype,
     );
   }
 }
@@ -216,6 +222,7 @@ class LeadersModel {
   final int? noOfItems;
   final int? noCorrect;
   final String? userId; // uuid as String — used to highlight current user
+  final String? apptype;
 
   const LeadersModel({
     this.id,
@@ -225,6 +232,7 @@ class LeadersModel {
     this.noOfItems,
     this.noCorrect,
     this.userId,
+    this.apptype,
   });
 
   factory LeadersModel.fromJson(Map<String, dynamic> json) {
@@ -238,6 +246,7 @@ class LeadersModel {
       noOfItems: json['no_of_items'] as int?,
       noCorrect: json['no_correct'] as int?,
       userId: json['user_id'] as String?,
+      apptype: json['apptype'] as String?,
     );
   }
 }
