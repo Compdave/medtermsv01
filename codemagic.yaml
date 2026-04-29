@@ -26,7 +26,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.reichardreviews.medterms
       flutter: 3.29.3
-      xcode: 16.2
+      xcode: 26
       cocoapods: default
       vars:
         APP_STORE_APP_ID: "6752959809"
@@ -216,7 +216,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.reichardreviews.teassci26
       flutter: 3.29.3
-      xcode: 16.2
+      xcode: 26
       cocoapods: default
       vars:
         APP_STORE_APP_ID: "6762864989"
