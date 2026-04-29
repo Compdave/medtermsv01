@@ -10,7 +10,7 @@ const medtermsConfig = AppConfig(
   appId: 1,
   apptypePrefix: 'mt01_reichrev',
   primaryColor: Color(0xFF1A6B5A),
-  accentColor: Color(0xFF3CC94A),
+  accentColor: Color.fromARGB(255, 22, 71, 27),
   gradientTop: Color(0xFF1A6B5A), // deep forest green
   gradientBottom: Color(0xFFD4EFE8), // light mint
   iconAssetPath: 'assets/icons/app_launcher_icon.png',
