@@ -82,6 +82,12 @@ workflows:
           sed -i '' \
             's/PRODUCT_BUNDLE_IDENTIFIER = com.reichardreviews.teassci26/PRODUCT_BUNDLE_IDENTIFIER = com.reichardreviews.medterms/g' \
             Runner.xcodeproj/project.pbxproj
+          /usr/libexec/PlistBuddy -c \
+            "Set :CFBundleDisplayName Med Terms" \
+            Runner/Info.plist
+          /usr/libexec/PlistBuddy -c \
+            "Set :CFBundleName Med Terms" \
+            Runner/Info.plist
 
 
       - name: Install CocoaPods
@@ -233,6 +239,10 @@ workflows:
           sed -i '' 's/android:label="[^"]*"/android:label="TEAS Science Q\&A 2026"/' \
             android/app/src/main/AndroidManifest.xml
 
+
+
+
+
       - name: Swap flutter_icons → TEAS
         script: |
           python3 - <<'EOF'
@@ -264,16 +274,21 @@ workflows:
         script: dart run flutter_launcher_icons
 
 
-      - name: Set TEAS bundle ID in Xcode project
+      - name: Set TEAS bundle ID and display name in Xcode project
         script: |
           cd ios
           /usr/libexec/PlistBuddy -c \
             "Set :CFBundleIdentifier com.reichardreviews.teassci26" \
             Runner/Info.plist
+          /usr/libexec/PlistBuddy -c \
+            "Set :CFBundleDisplayName TEAS Science" \
+            Runner/Info.plist
+          /usr/libexec/PlistBuddy -c \
+            "Set :CFBundleName TEAS Science" \
+            Runner/Info.plist
           sed -i '' \
             's/PRODUCT_BUNDLE_IDENTIFIER = com.reichardreviews.medterms/PRODUCT_BUNDLE_IDENTIFIER = com.reichardreviews.teassci26/g' \
             Runner.xcodeproj/project.pbxproj
-
 
 
 
