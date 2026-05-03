@@ -74,17 +74,14 @@ class RevenueCatService {
     try {
       final offerings = await Purchases.getOfferings();
 
-      // Search current offering first
-      if (offerings.current != null) {
-        for (final package in offerings.current!.availablePackages) {
-          if (package.storeProduct.identifier == productId ||
-              package.identifier == productId) {
-            return package;
-          }
-        }
+      // Grab the 'default' offering explicitly
+      final defaultOffering = offerings.all['default'];
+      if (defaultOffering != null) {
+        final lifetime = defaultOffering.lifetime;
+        if (lifetime != null) return lifetime;
       }
 
-      // Search all offerings
+      // Fallback: search all offerings by product/package identifier
       for (final offering in offerings.all.values) {
         for (final package in offering.availablePackages) {
           if (package.storeProduct.identifier == productId ||
@@ -96,6 +93,7 @@ class RevenueCatService {
 
       return null;
     } catch (e) {
+      debugPrint('RC fetchPackage error: $e');
       return null;
     }
   }
