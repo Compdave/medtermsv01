@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:medtermsv01/core/config/app_config.dart';
 import 'package:medtermsv01/core/providers/providers.dart';
 import 'package:medtermsv01/core/theme/app_theme.dart';
 
@@ -349,7 +350,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
 
   Widget _buildCounter(QuizSessionState session) {
     return Text(
-      'Medical Terminology  •  Question ${session.displayPosition} of ${session.totalInQueue}',
+      '${AppConfig.instance.appName}  •  Question ${session.displayPosition} of ${session.totalInQueue}',
       style: TextStyle(
         fontSize: 13,
         color: const Color(0xFF1A6B5A).withValues(alpha: 0.8),
