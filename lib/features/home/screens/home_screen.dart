@@ -158,7 +158,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Welcome Header — FIX: name uses FittedBox to prevent overflow
+  // Welcome Header
   // ---------------------------------------------------------------------------
 
   Widget _buildWelcomeHeader(String? displayName, bool isGuest) {
@@ -186,7 +186,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
         const SizedBox(width: 14),
-        // FIX: Expanded + FittedBox so long names shrink instead of overflow
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,7 +227,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       orElse: () => {},
     );
 
-    // FIX: track whether any paid module is purchased
     final purchasedModules = modules
         .where((m) => m['purchased'] == true && m['sample'] != true)
         .toList();
@@ -456,7 +454,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error loading stats: \$e')),
+          const SnackBar(content: Text('Error loading stats.')),
         );
       }
     }
@@ -545,12 +543,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // ---------------------------------------------------------------------------
   // Unlock Card
-  // FIX: shows different title/subtitle/button depending on purchase state
   // ---------------------------------------------------------------------------
 
   Widget _buildUnlockCard(bool hasPurchasedModule) {
-    // When modules are purchased: show "Select Working Module"
-    // When nothing purchased: show "Unlock Full Course"
     final title =
         hasPurchasedModule ? 'Select Working Module' : 'Unlock Full Course';
     final subtitle = hasPurchasedModule
@@ -595,8 +590,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             width: double.infinity,
             height: 48,
             child: ElevatedButton(
-              // FIX: pass selectMode=true when user already has a module,
-              // so the modules list sets default instead of launching quiz
               onPressed: () => context.push(
                 hasPurchasedModule ? '/modules?selectMode=true' : '/modules',
               ),
@@ -885,7 +878,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         quizId: quizId,
         userId: userId,
       );
+      // Invalidate all relevant providers so UI reflects the reset immediately
       ref.invalidate(moduleListProvider);
+      ref.invalidate(quizSessionProvider);
+      ref.invalidate(userSummaryProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
