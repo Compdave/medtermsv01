@@ -43,14 +43,14 @@ workflows:
           sed -i '' 's/android:label="[^"]*"/android:label="medtermsv01"/' \
             android/app/src/main/AndroidManifest.xml
 
-      - name: Swap flutter_icons → MedTerms
+      - name: Swap flutter_launcher_icons → MedTerms
         script: |
           python3 - <<'EOF'
           import re
           with open('pubspec.yaml', 'r') as f:
               content = f.read()
           content = re.sub(
-              r'(flutter_icons:.*?image_path:\s*")[^"]*(")',
+              r'(flutter_launcher_icons:.*?image_path:\s*")[^"]*(")',
               r'\g<1>assets/icons/app_launcher_icon.png\2',
               content, flags=re.DOTALL
           )
@@ -160,14 +160,14 @@ workflows:
           sed -i 's/android:label="[^"]*"/android:label="medtermsv01"/' \
             android/app/src/main/AndroidManifest.xml
 
-      - name: Swap flutter_icons → MedTerms
+      - name: Swap flutter_launcher_icons → MedTerms
         script: |
           python3 - <<'EOF'
           import re
           with open('pubspec.yaml', 'r') as f:
               content = f.read()
           content = re.sub(
-              r'(flutter_icons:.*?image_path:\s*")[^"]*(")',
+              r'(flutter_launcher_icons:.*?image_path:\s*")[^"]*(")',
               r'\g<1>assets/icons/app_launcher_icon.png\2',
               content, flags=re.DOTALL
           )
@@ -243,14 +243,14 @@ workflows:
 
 
 
-      - name: Swap flutter_icons → TEAS
+      - name: Swap flutter_launcher_icons → TEAS
         script: |
           python3 - <<'EOF'
           import re
           with open('pubspec.yaml', 'r') as f:
               content = f.read()
           content = re.sub(
-              r'(flutter_icons:.*?image_path:\s*")[^"]*(")',
+              r'(flutter_launcher_icons:.*?image_path:\s*")[^"]*(")',
               r'\g<1>assets/icons/app_launcher_icon_TEAS.png\2',
               content, flags=re.DOTALL
           )
@@ -362,14 +362,14 @@ workflows:
           sed -i 's/android:label="[^"]*"/android:label="TEAS Science Q\&A 2026"/' \
             android/app/src/main/AndroidManifest.xml
 
-      - name: Swap flutter_icons → TEAS
+      - name: Swap flutter_launcher_icons → TEAS
         script: |
           python3 - <<'EOF'
           import re
           with open('pubspec.yaml', 'r') as f:
               content = f.read()
           content = re.sub(
-              r'(flutter_icons:.*?image_path:\s*")[^"]*(")',
+              r'(flutter_launcher_icons:.*?image_path:\s*")[^"]*(")',
               r'\g<1>assets/icons/app_launcher_icon_TEAS.png\2',
               content, flags=re.DOTALL
           )

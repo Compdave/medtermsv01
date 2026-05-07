@@ -307,14 +307,14 @@ class _QuestPageState extends ConsumerState<QuestPage> {
                     session, notifier, 4, question.answer4 ?? ''),
                 const SizedBox(height: 16),
 
-                // Result feedback
-                if (submitted) _buildResultFeedback(session, question),
+                // Result feedback + expandable rationale (combined)
+                if (submitted)
+                  _FeedbackWithRationale(
+                    isCorrect: question.isCorrect ?? false,
+                    corrAns: question.corrAns ?? 0,
+                    rationale: hasRationale ? question.rationale! : null,
+                  ),
                 if (submitted) const SizedBox(height: 10),
-
-                // Rationale
-                if (submitted && hasRationale)
-                  _buildRationaleSection(question.rationale!),
-                if (submitted && hasRationale) const SizedBox(height: 10),
 
                 const SizedBox(height: 8),
               ],
@@ -527,152 +527,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Result Feedback
-  // ---------------------------------------------------------------------------
-
-  Widget _buildResultFeedback(QuizSessionState session, dynamic question) {
-    final isCorrect = question.isCorrect as bool? ?? false;
-    final corrAns = question.corrAns as int? ?? 0;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isCorrect ? const Color(0xFFE8F8EE) : const Color(0xFFFFF0F0),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isCorrect ? const Color(0xFF2E9E5A) : const Color(0xFFD94040),
-          width: 1.5,
-        ),
-      ),
-      child: Text(
-        isCorrect ? 'Correct!' : 'Incorrect.  The correct answer is $corrAns.',
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: isCorrect ? const Color(0xFF1A5C35) : const Color(0xFFD94040),
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Rationale
-  // ---------------------------------------------------------------------------
-
-  Widget _buildRationaleSection(String rationale) {
-    return GestureDetector(
-      onTap: () => _showRationaleModal(rationale),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Rationale',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primary,
-              ),
-            ),
-            Icon(Icons.info_outline_rounded, color: AppColors.primary),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showRationaleModal(String rationale) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Header
-            Row(
-              children: [
-                Icon(Icons.info_outline_rounded,
-                    color: AppColors.primary, size: 20),
-                const SizedBox(width: 8),
-                const Text(
-                  'Rationale',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF0D2B24),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            const SizedBox(height: 16),
-            // Rationale text — scrollable for long text
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.5,
-              ),
-              child: SingleChildScrollView(
-                child: Text(
-                  rationale,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF0D2B24),
-                    height: 1.6,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: const Text('Close',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // (Result feedback and rationale are now handled by _FeedbackWithRationale below)
 
   // ---------------------------------------------------------------------------
   // Bottom Controls
@@ -874,6 +729,154 @@ enum _AnswerState {
   selectedPending,
   correct,
   wrongSelected,
+}
+
+// =============================================================================
+// Feedback + Expandable Rationale Widget
+// =============================================================================
+
+class _FeedbackWithRationale extends StatefulWidget {
+  final bool isCorrect;
+  final int corrAns;
+  final String? rationale; // null = no rationale for this question
+
+  const _FeedbackWithRationale({
+    required this.isCorrect,
+    required this.corrAns,
+    this.rationale,
+  });
+
+  @override
+  State<_FeedbackWithRationale> createState() => _FeedbackWithRationaleState();
+}
+
+class _FeedbackWithRationaleState extends State<_FeedbackWithRationale>
+    with SingleTickerProviderStateMixin {
+  bool _expanded = false;
+  late final AnimationController _controller;
+  late final Animation<double> _expandAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    );
+    _expandAnim = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _expanded = !_expanded);
+    _expanded ? _controller.forward() : _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasRationale = widget.rationale != null;
+    final borderColor =
+        widget.isCorrect ? const Color(0xFF2E9E5A) : const Color(0xFFD94040);
+    final bgColor =
+        widget.isCorrect ? const Color(0xFFE8F8EE) : const Color(0xFFFFF0F0);
+    final textColor =
+        widget.isCorrect ? const Color(0xFF1A5C35) : const Color(0xFFD94040);
+    final feedbackText = widget.isCorrect
+        ? 'Correct!'
+        : 'Incorrect.  The correct answer is ${widget.corrAns}.';
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ── Header row (always visible) ──────────────────────────────────
+          InkWell(
+            onTap: hasRationale ? _toggle : null,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  // Feedback text
+                  Expanded(
+                    child: Text(
+                      feedbackText,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                  // Rationale badge + chevron (only when rationale exists)
+                  if (hasRationale) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: borderColor,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Rationale',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    RotationTransition(
+                      turns: Tween(begin: 0.0, end: 0.5).animate(_expandAnim),
+                      child: Icon(Icons.keyboard_arrow_down_rounded,
+                          color: textColor, size: 22),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+
+          // ── Expandable rationale body ────────────────────────────────────
+          if (hasRationale)
+            SizeTransition(
+              sizeFactor: _expandAnim,
+              axisAlignment: -1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Divider(height: 1, color: borderColor.withValues(alpha: 0.4)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                    child: Text(
+                      widget.rationale!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF0D2B24),
+                        height: 1.6,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 // =============================================================================
