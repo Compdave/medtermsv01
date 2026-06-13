@@ -213,7 +213,7 @@ workflows:
     instance_type: mac_mini_m2
 
     integrations:
-      app_store_connect: Codemagic
+      app_store_connect: ReichardReviews_Codemagic
 
     environment:
       groups:
