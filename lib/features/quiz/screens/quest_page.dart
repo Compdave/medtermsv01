@@ -406,6 +406,10 @@ class _QuestPageState extends ConsumerState<QuestPage> {
     int index,
     String text,
   ) {
+    const labels = ['A', 'B', 'C', 'D'];
+
+    final label = labels[index - 1]; // index is 1-based
+
     final answerState = _getAnswerState(session, index);
     final submitted = session.currentQuestion?.isComplete ?? false;
 
@@ -488,7 +492,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
                   ),
                   child: Center(
                     child: Text(
-                      '$index',
+                      label,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -788,7 +792,12 @@ class _FeedbackWithRationaleState extends State<_FeedbackWithRationale>
         widget.isCorrect ? const Color(0xFF1A5C35) : const Color(0xFFD94040);
     final feedbackText = widget.isCorrect
         ? 'Correct!'
-        : 'Incorrect.  The correct answer is ${widget.corrAns}.';
+        : 'Incorrect.  The correct answer is ${[
+            'A',
+            'B',
+            'C',
+            'D'
+          ][widget.corrAns - 1]}.';
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
