@@ -643,31 +643,26 @@ class _QuestPageState extends ConsumerState<QuestPage> {
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // |< First
-          _navIconButton(
-            icon: Icons.first_page_rounded,
+          _navTextButton(
+            label: 'First',
             onTap: session.isFirstQuestion ? null : notifier.goToFirst,
           ),
-          // < Previous
-          _navIconButton(
-            icon: Icons.chevron_left_rounded,
+          _navTextButton(
+            label: 'Prev',
             onTap: session.isFirstQuestion ? null : notifier.goToPrevious,
           ),
-
-          // Quest # text field
-          Expanded(
+          SizedBox(
+            width: 80,
             child: _buildQuestJumpField(session, notifier),
           ),
-
-          // > Next
-          _navIconButton(
-            icon: Icons.chevron_right_rounded,
-            onTap: session.isLastQuestion ? null : notifier.goToNext,
+          _navTextButton(
+            label: 'Next',
+            onTap: session.isFirstQuestion ? null : notifier.goToNext,
           ),
-          // >| Last
-          _navIconButton(
-            icon: Icons.last_page_rounded,
+          _navTextButton(
+            label: 'Last',
             onTap: session.isLastQuestion ? null : notifier.goToLast,
           ),
         ],
@@ -675,17 +670,20 @@ class _QuestPageState extends ConsumerState<QuestPage> {
     );
   }
 
-  Widget _navIconButton({
-    required IconData icon,
-    VoidCallback? onTap,
-  }) {
-    return IconButton(
+  Widget _navTextButton({required String label, VoidCallback? onTap}) {
+    return TextButton(
       onPressed: onTap,
-      icon: Icon(icon, size: 26),
-      color: onTap == null ? Colors.grey.shade400 : AppColors.primary,
-      splashRadius: 20,
-      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-      padding: EdgeInsets.zero,
+      style: TextButton.styleFrom(
+        foregroundColor:
+            onTap == null ? Colors.grey.shade400 : AppColors.primary,
+        minimumSize: const Size(44, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+      ),
     );
   }
 
