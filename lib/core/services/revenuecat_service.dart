@@ -1,6 +1,7 @@
 // ignore_for_file: unused_local_variable
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:medtermsv01/core/config/app_config.dart';
 // lib/core/services/revenuecat_service.dart
 
@@ -120,7 +121,39 @@ class RevenueCatService {
       if (e.code == PurchasesErrorCode.purchaseCancelledError) {
         return false; // User cancelled — not an error
       }
+      if (e.code == PurchasesErrorCode.productAlreadyPurchasedError) {
+        return true; // Already owned — treat as success so unlock flow runs
+      }
       rethrow;
+    } on PlatformException catch (e) {
+      // Google Play sometimes surfaces ITEM_ALREADY_OWNED as a raw
+      // PlatformException (code '6') before the RevenueCat SDK converts it.
+      final details = e.details?.toString() ?? '';
+      if (e.code == '6' ||
+          details.contains('ProductAlreadyPurchasedError') ||
+          details.contains('ITEM_ALREADY_OWNED')) {
+        return true;
+      }
+      rethrow;
+    }
+  }
+
+  /// Returns true if the current user already owns any product.
+  /// On Android, calls restorePurchases() first to sync the Google Play
+  /// account's purchase state into RevenueCat — catching the case where
+  /// a new app user is on a device whose Google Play account already bought
+  /// the product. On iOS, restorePurchases() can trigger an App Store
+  /// sign-in prompt so we use the cached getCustomerInfo() instead.
+  static Future<bool> isAlreadyPurchased() async {
+    try {
+      if (Platform.isAndroid) {
+        final info = await Purchases.restorePurchases();
+        return info.entitlements.active.isNotEmpty;
+      }
+      final info = await Purchases.getCustomerInfo();
+      return info.entitlements.active.isNotEmpty;
+    } catch (e) {
+      return false;
     }
   }
 

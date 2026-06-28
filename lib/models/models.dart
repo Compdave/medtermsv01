@@ -104,20 +104,20 @@ class CountryModel {
 // ---------------------------------------------------------------------------
 class CustomerModel {
   final String? userId;
-  final String lsCustomerId;
-  final String email;
+  final String? lsCustomerId;
+  final String? email;
 
   const CustomerModel({
     this.userId,
-    required this.lsCustomerId,
-    required this.email,
+    this.lsCustomerId,
+    this.email,
   });
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
     return CustomerModel(
       userId: json['user_id'] as String?,
-      lsCustomerId: json['ls_customer_id'] as String,
-      email: json['email'] as String,
+      lsCustomerId: json['ls_customer_id'] as String?,
+      email: json['email'] as String?,
     );
   }
 

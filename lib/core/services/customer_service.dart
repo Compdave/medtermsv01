@@ -54,4 +54,17 @@ class CustomerService {
       },
     );
   }
+
+  /// Upsert a customer record for a RevenueCat (mobile) purchase.
+  /// Uses user_id as the primary key — ls_customer_id is left null
+  /// since RevenueCat purchases don't involve LemonSqueezy.
+  static Future<void> upsertRevenueCatCustomer({
+    required String userId,
+    required String email,
+  }) async {
+    await _client.from('customers').upsert(
+      {'user_id': userId, 'email': email},
+      onConflict: 'user_id',
+    );
+  }
 }

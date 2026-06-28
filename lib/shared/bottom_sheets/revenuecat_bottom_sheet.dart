@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:medtermsv01/core/providers/providers.dart';
+import 'package:medtermsv01/core/services/customer_service.dart';
 import 'package:medtermsv01/core/services/revenuecat_service.dart';
 import 'package:medtermsv01/core/services/supabase_service.dart';
 import 'package:medtermsv01/core/theme/app_theme.dart';
@@ -70,6 +71,14 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
   }
 
   Future<void> _loadPackage() async {
+    // If RevenueCat already shows ownership, skip the purchase screen entirely
+    // and just ensure the module is unlocked in our backend.
+    final alreadyOwned = await RevenueCatService.isAlreadyPurchased();
+    if (alreadyOwned) {
+      await _unlockAndComplete();
+      return;
+    }
+
     final package = await RevenueCatService.fetchPackage(widget.apptype);
     if (mounted) {
       setState(() {
@@ -77,6 +86,38 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
         _priceString = package?.storeProduct.priceString;
         _isLoadingPackage = false;
       });
+    }
+  }
+
+  /// Called when the user already owns the product in RevenueCat.
+  /// Ensures the module is unlocked in Supabase, then closes the sheet.
+  Future<void> _unlockAndComplete() async {
+    final userId = SupabaseService.currentUserId ?? '';
+    final email = SupabaseService.currentUser?.email ?? '';
+    await RevenueCatService.ensureModuleUnlocked(
+      userId: userId,
+      quizId: widget.quizId,
+      apptype: widget.apptype,
+      webhookDelay: Duration.zero, // webhook already fired previously
+    );
+    await CustomerService.upsertRevenueCatCustomer(
+      userId: userId,
+      email: email,
+    );
+    ref.invalidate(moduleListProvider);
+    if (mounted) {
+      Navigator.of(context).pop();
+      if (widget.onPurchaseComplete != null) {
+        widget.onPurchaseComplete!();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('"${widget.moduleName}" is ready to study!'),
+            backgroundColor: AppColors.primary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -92,10 +133,15 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
       }
 
       final userId = SupabaseService.currentUserId ?? '';
+      final email = SupabaseService.currentUser?.email ?? '';
       await RevenueCatService.ensureModuleUnlocked(
         userId: userId,
         quizId: widget.quizId,
         apptype: widget.apptype,
+      );
+      await CustomerService.upsertRevenueCatCustomer(
+        userId: userId,
+        email: email,
       );
 
       ref.invalidate(moduleListProvider);

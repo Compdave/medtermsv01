@@ -659,7 +659,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
           ),
           _navTextButton(
             label: 'Next',
-            onTap: session.isFirstQuestion ? null : notifier.goToNext,
+            onTap: session.isLastQuestion ? null : notifier.goToNext,
           ),
           _navTextButton(
             label: 'Last',
