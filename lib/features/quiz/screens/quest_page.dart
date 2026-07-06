@@ -1,7 +1,6 @@
 // lib/features/quiz/screens/quest_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medtermsv01/core/config/app_config.dart';
@@ -32,7 +31,17 @@ class _QuestPageState extends ConsumerState<QuestPage> {
   );
 
   final _questJumpController = TextEditingController();
+  final _questJumpFocusNode = FocusNode();
 //  bool _showRationale = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Rebuild when jump field text changes so Submit button reacts immediately.
+    _questJumpController.addListener(_onJumpTextChanged);
+  }
+
+  void _onJumpTextChanged() => setState(() {});
 
   // ---------------------------------------------------------------------------
   // Answer Button Color Logic
@@ -69,7 +78,9 @@ class _QuestPageState extends ConsumerState<QuestPage> {
 
   @override
   void dispose() {
+    _questJumpController.removeListener(_onJumpTextChanged);
     _questJumpController.dispose();
+    _questJumpFocusNode.dispose();
     super.dispose();
   }
 
@@ -274,7 +285,10 @@ class _QuestPageState extends ConsumerState<QuestPage> {
     final hasRationale =
         question.rationale != null && question.rationale!.trim().isNotEmpty;
 
-    return Column(
+    return GestureDetector(
+      onTap: () => _questJumpFocusNode.unfocus(),
+      behavior: HitTestBehavior.translucent,
+      child: Column(
       children: [
         // Progress bar
         _buildProgressBar(session),
@@ -325,6 +339,7 @@ class _QuestPageState extends ConsumerState<QuestPage> {
         // Bottom controls — always visible
         _buildBottomControls(session, notifier, submitted),
       ],
+      ),
     );
   }
 
@@ -591,15 +606,27 @@ class _QuestPageState extends ConsumerState<QuestPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: session.selectedAnswer == null ||
-                          session.selectedAnswer == 0 ||
-                          submitted ||
-                          session.isSubmitting
-                      ? null
-                      : () async {
-//                          setState(() => _showRationale = false);
-                          await notifier.submitAnswer();
-                        },
+                  onPressed: _questJumpController.text.trim().isNotEmpty
+                      ? () {
+                          // Jump field present — navigate instead of submitting
+                          final n = int.tryParse(
+                              _questJumpController.text.trim());
+                          if (n != null &&
+                              n >= 1 &&
+                              n <= session.totalInQueue) {
+                            notifier.goToPosition(n);
+                          }
+                          _questJumpController.clear();
+                          _questJumpFocusNode.unfocus();
+                        }
+                      : (session.selectedAnswer == null ||
+                              session.selectedAnswer == 0 ||
+                              submitted ||
+                              session.isSubmitting)
+                          ? null
+                          : () async {
+                              await notifier.submitAnswer();
+                            },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -691,8 +718,9 @@ class _QuestPageState extends ConsumerState<QuestPage> {
       QuizSessionState session, QuizSessionNotifier notifier) {
     return TextField(
       controller: _questJumpController,
-      keyboardType: TextInputType.number,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      focusNode: _questJumpFocusNode,
+      keyboardType: TextInputType.text,
+      textInputAction: TextInputAction.go,
       textAlign: TextAlign.center,
       style: const TextStyle(
         fontSize: 15,
@@ -714,9 +742,9 @@ class _QuestPageState extends ConsumerState<QuestPage> {
         final n = int.tryParse(value);
         if (n != null && n >= 1 && n <= session.totalInQueue) {
           notifier.goToPosition(n);
-//          setState(() => _showRationale = false);
         }
         _questJumpController.clear();
+        _questJumpFocusNode.unfocus();
       },
     );
   }

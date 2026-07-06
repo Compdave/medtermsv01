@@ -3,6 +3,7 @@ allprojects {
         google()
         mavenCentral()
     }
+    buildDir = File("C:/AndroidBuilds/${rootProject.name}/${project.name}")
 }
 
 val newBuildDir: Directory =

@@ -1,4 +1,4 @@
-package com.reichardreviews.teassci26
+package com.reichardreviews.medterms
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -38,6 +38,7 @@ if ($flavor -eq "medterms") {
         | Set-Content pubspec.yaml
 
     dart run flutter_launcher_icons
+    Get-ChildItem -Path "android\app\src\main\res" -Filter "desktop.ini" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
     if ($run) {
         Write-Host "Launching MedTerms in debug mode..." -ForegroundColor Cyan
@@ -73,6 +74,7 @@ if ($flavor -eq "medterms") {
         | Set-Content pubspec.yaml
 
     dart run flutter_launcher_icons
+    Get-ChildItem -Path "android\app\src\main\res" -Filter "desktop.ini" -Recurse -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
     if ($run) {
         Write-Host "Launching TEAS in debug mode..." -ForegroundColor Cyan
