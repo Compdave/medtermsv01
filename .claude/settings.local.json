@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(attrib +H \"D:\\\\Dropbox\\\\AndroidStudioProjects\\\\reichardreviews\\\\.git\" /S /D)"
+    ]
+  }
+}
