@@ -46,6 +46,14 @@ class AppDrawer extends ConsumerWidget {
                 onTap: () => _launchUrl(AppConfig.instance.faqUrl, context),
               ),
               _drawerItem(
+                icon: Icons.info_outline_rounded,
+                label: 'About',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push('/about');
+                },
+              ),
+              _drawerItem(
                 icon: Icons.refresh_rounded,
                 iconColor: AppColors.accent,
                 label: 'Restore Purchase',

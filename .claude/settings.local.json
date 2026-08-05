@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(attrib +H \"D:\\\\Dropbox\\\\AndroidStudioProjects\\\\reichardreviews\\\\.git\" /S /D)"
+      "PowerShell(attrib +H \"D:\\\\Dropbox\\\\AndroidStudioProjects\\\\reichardreviews\\\\.git\" /S /D)",
+      "Bash(flutter analyze *)"
     ]
   }
 }

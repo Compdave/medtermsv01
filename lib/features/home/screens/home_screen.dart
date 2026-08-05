@@ -699,9 +699,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'),
             const SizedBox(width: 20),
             _licensesLink(),
+            const SizedBox(width: 20),
+            GestureDetector(
+              onTap: () => context.push('/about'),
+              child: Text(
+                'About',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: const Color(0xFF0D2B24).withValues(alpha: 0.75),
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
+
+
         Text(
           'Copyright © 2026 Reichard Reviews, LLC.\nAll Rights Reserved.',
           textAlign: TextAlign.center,
@@ -711,6 +725,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             height: 1.5,
           ),
         ),
+
+        const SizedBox(height: 4),
+        Text(
+          'Designed & Developed by',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 11,
+            color: const Color(0xFF0D2B24).withValues(alpha: 0.65),
+            height: 1.5,
+          ),
+        ),
+
+        _footerLink('DAR Digital Solutions', 'https://dardigitalsolutions.com'),
+        const SizedBox(height: 6),
+
+
       ],
     );
   }

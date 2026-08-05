@@ -493,6 +493,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(width: 24),
             _footerLink('EULA',
                 'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/'),
+            const SizedBox(width: 24),
+            GestureDetector(
+              onTap: () => context.push('/about'),
+              child: const Text(
+                'About',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF0D2B24),
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -510,6 +522,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           },
         ),
         const SizedBox(height: 4),
+
         Text(
           'Copyright © 2026 Reichard Reviews, LLC.\nAll Rights Reserved.',
           textAlign: TextAlign.center,
@@ -519,6 +532,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             height: 1.5,
           ),
         ),
+
+        const SizedBox(height: 4),
+        Text(
+          'Designed & Developed by',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 11,
+            color: const Color(0xFF0D2B24).withValues(alpha: 0.65),
+            height: 1.5,
+          ),
+        ),
+
+        _footerLink('DAR Digital Solutions', 'https://dardigitalsolutions.com'),
+        const SizedBox(height: 6),
+
+
       ],
     );
   }

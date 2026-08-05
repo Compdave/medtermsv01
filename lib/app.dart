@@ -13,6 +13,7 @@ import 'package:medtermsv01/features/modules/screens/modules_list_screen.dart';
 import 'package:medtermsv01/features/leaderboard/screens/leaderboard_screen.dart';
 import 'package:medtermsv01/features/profile/screens/profile_screen.dart';
 import 'package:medtermsv01/features/promo/screens/promo_screen.dart';
+import 'package:medtermsv01/features/about/screens/about_screen.dart';
 import 'package:medtermsv01/core/theme/app_theme.dart';
 
 class App extends ConsumerWidget {
@@ -36,8 +37,9 @@ class App extends ConsumerWidget {
       redirect: (context, state) {
         final isSignedIn = AuthService.isSignedIn;
         final isLoginRoute = state.matchedLocation == '/login';
+        final isPublicRoute = isLoginRoute || state.matchedLocation == '/about';
 
-        if (!isSignedIn && !isLoginRoute) return '/login';
+        if (!isSignedIn && !isPublicRoute) return '/login';
         if (isSignedIn && isLoginRoute) return '/home';
         return null;
       },
@@ -93,6 +95,13 @@ class App extends ConsumerWidget {
           path: '/profile',
           name: 'profile',
           builder: (context, state) => const ProfileScreen(),
+        ),
+
+        // About
+        GoRoute(
+          path: '/about',
+          name: 'about',
+          builder: (context, state) => const AboutScreen(),
         ),
 
         // Promo / LemonSqueezy checkout
