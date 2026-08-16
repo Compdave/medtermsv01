@@ -1,7 +1,7 @@
 name: medtermsv01
 description: Medical Terminology Q&A App
 publish_to: 'none'
-version: 2.23.76+76
+version: 2.23.77+77
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -85,9 +85,7 @@ flutter:
   
 
   assets:
-    - assets/images/                # App logo, module artwork
     - assets/icons/                 # Custom icons if needed
-    - assets/animations/            # Lottie JSON files (score screen etc.)
 
   # fonts:                          # Uncomment if using local fonts
   #   - family: YourFont

@@ -372,7 +372,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   Switch(
                     value: _timerEnabled,
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     onChanged: (val) async {
                       setDialogState(() {});
                       await _setTimerPref(val);
