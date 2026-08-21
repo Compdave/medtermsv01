@@ -107,10 +107,9 @@ class RevenueCatService {
   /// Returns true if purchase was successful or already owned.
   /// Throws [PurchasesErrorCode] on failure.
   ///
-  /// After a successful purchase:
-  /// 1. RC webhook fires → Supabase Edge Function → insertnewmodule (primary)
-  /// 2. Client-side fallback checks hasModule() and calls insertnewmodule
-  ///    directly if webhook hasn't fired yet.
+  /// After a successful purchase, the RC webhook fires → Supabase Edge
+  /// Function → insertnewmodule. This is the *only* path that unlocks a
+  /// paid module — see [ensureModuleUnlocked], which polls for it.
   static Future<bool> purchasePackage(Package package) async {
     try {
       // v9 API: PurchaseParams takes package as positional argument
@@ -180,34 +179,33 @@ class RevenueCatService {
   }
 
   // ---------------------------------------------------------------------------
-  // Post-purchase module unlock (client-side fallback)
+  // Post-purchase module unlock confirmation
   // ---------------------------------------------------------------------------
 
   /// Called after a successful RC purchase.
-  /// Waits briefly for the webhook to fire, then checks if module is unlocked.
-  /// If not yet unlocked, calls insertnewmodule directly as a fallback.
-  static Future<void> ensureModuleUnlocked({
+  /// Polls until the revenuecat-webhook Edge Function has unlocked the module
+  /// server-side, or [timeout] elapses. Returns true once the module is
+  /// confirmed unlocked.
+  ///
+  /// There is deliberately no client-side fallback that unlocks the module
+  /// directly — insertnewmodule now rejects paid-module inserts from
+  /// anything but the service_role (i.e. the webhook), since the client
+  /// can't be trusted to assert its own purchase actually happened.
+  static Future<bool> ensureModuleUnlocked({
     required String userId,
     required int quizId,
-    required String apptype,
-    Duration webhookDelay = const Duration(seconds: 3),
+    Duration timeout = const Duration(seconds: 15),
+    Duration pollInterval = const Duration(seconds: 2),
   }) async {
-    // Give webhook time to fire
-    await Future.delayed(webhookDelay);
-
-    // Check if module is already unlocked by webhook
-    final alreadyUnlocked = await ModuleService.hasModule(
-      userId: userId,
-      quizId: quizId,
-    );
-
-    if (!alreadyUnlocked) {
-      // Webhook hasn't fired yet — unlock directly as fallback
-      await ModuleService.unlockModule(
-        apptype: apptype,
+    final deadline = DateTime.now().add(timeout);
+    while (true) {
+      final unlocked = await ModuleService.hasModule(
         userId: userId,
         quizId: quizId,
       );
+      if (unlocked) return true;
+      if (DateTime.now().isAfter(deadline)) return false;
+      await Future.delayed(pollInterval);
     }
   }
 }
