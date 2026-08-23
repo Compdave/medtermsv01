@@ -889,7 +889,7 @@ class _FeedbackWithRationaleState extends State<_FeedbackWithRationale>
           if (hasRationale)
             SizeTransition(
               sizeFactor: _expandAnim,
-              axisAlignment: -1,
+              alignment: Alignment.topCenter,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

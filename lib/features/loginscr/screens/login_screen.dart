@@ -90,6 +90,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final userId = response.user?.id;
     if (userId == null) throw Exception('Sign up failed — no user returned.');
 
+    // Log in to RevenueCat with the new Supabase user ID — without this,
+    // RC keeps whatever identity it was previously configured with (stale
+    // session or 'anonymous'), so purchases/restores resolve against the
+    // wrong customer.
+    if (Platform.isIOS || Platform.isAndroid) {
+      await RevenueCatService.logIn(userId);
+    }
+
     // Update display name on public.users (trigger already created the row)
     if (displayName.isNotEmpty) {
       await UserService.updateDisplayName(

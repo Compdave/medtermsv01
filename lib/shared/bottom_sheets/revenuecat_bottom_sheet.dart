@@ -66,6 +66,13 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
   bool _isPurchasing = false;
   String? _priceString;
 
+  // Already-owned-but-unlock-pending state — Play/App Store confirms the
+  // user owns this product but our backend hasn't unlocked the module yet
+  // (the RC webhook hasn't landed). Kept distinct from "no product found"
+  // so an already-paying customer isn't told the price is unavailable.
+  bool _alreadyOwned = false;
+  bool _isConfirmingUnlock = false;
+
   @override
   void initState() {
     super.initState();
@@ -77,6 +84,7 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
     // and just ensure the module is unlocked in our backend.
     final alreadyOwned = await RevenueCatService.isAlreadyPurchased();
     if (alreadyOwned) {
+      if (mounted) setState(() => _alreadyOwned = true);
       await _unlockAndComplete();
       return;
     }
@@ -94,6 +102,11 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
   /// Called when the user already owns the product in RevenueCat.
   /// Confirms the module is unlocked server-side, then closes the sheet.
   Future<void> _unlockAndComplete() async {
+    if (mounted) {
+      setState(() {
+        _isConfirmingUnlock = true;
+      });
+    }
     final userId = SupabaseService.currentUserId ?? '';
     final email = SupabaseService.currentUser?.email ?? '';
     final unlocked = await RevenueCatService.ensureModuleUnlocked(
@@ -102,15 +115,10 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
     );
     if (!unlocked) {
       if (mounted) {
-        setState(() => _isLoadingPackage = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'Still confirming your purchase of "${widget.moduleName}" — check back in a moment.'),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        setState(() {
+          _isLoadingPackage = false;
+          _isConfirmingUnlock = false;
+        });
       }
       return;
     }
@@ -282,7 +290,7 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
                   border:
                       Border.all(color: Colors.white.withValues(alpha: 0.3)),
                 ),
-                child: _isLoadingPackage
+                child: (_isLoadingPackage || _isConfirmingUnlock)
                     ? const SizedBox(
                         width: 20,
                         height: 20,
@@ -290,9 +298,12 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
                             color: Colors.white, strokeWidth: 2),
                       )
                     : Text(
-                        _priceString != null
-                            ? 'One-time Purchase: $_priceString'
-                            : 'Price unavailable',
+                        _alreadyOwned
+                            ? 'Already purchased — confirming with server'
+                            : (_priceString != null
+                                ? 'One-time Purchase: $_priceString'
+                                : 'Price unavailable'),
+                        textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.white,
@@ -305,8 +316,11 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed:
-                      (_isPurchasing || _isLoadingPackage || _package == null)
+                  onPressed: _alreadyOwned
+                      ? (_isConfirmingUnlock ? null : _unlockAndComplete)
+                      : (_isPurchasing ||
+                              _isLoadingPackage ||
+                              _package == null)
                           ? null
                           : _purchase,
                   style: ElevatedButton.styleFrom(
@@ -318,16 +332,16 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
                         borderRadius: BorderRadius.circular(16)),
                     elevation: 2,
                   ),
-                  child: _isPurchasing
+                  child: (_isPurchasing || (_alreadyOwned && _isConfirmingUnlock))
                       ? const SizedBox(
                           width: 22,
                           height: 22,
                           child: CircularProgressIndicator(
                               color: Colors.white, strokeWidth: 2.5),
                         )
-                      : const Text(
-                          'Purchase Now',
-                          style: TextStyle(
+                      : Text(
+                          _alreadyOwned ? 'Try Again' : 'Purchase Now',
+                          style: const TextStyle(
                               fontSize: 17, fontWeight: FontWeight.w700),
                         ),
                 ),

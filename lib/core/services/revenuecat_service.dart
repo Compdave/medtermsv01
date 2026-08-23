@@ -75,14 +75,17 @@ class RevenueCatService {
     try {
       final offerings = await Purchases.getOfferings();
 
-      // Grab the 'default' offering explicitly
-      final defaultOffering = offerings.all['default'];
-      if (defaultOffering != null) {
-        final lifetime = defaultOffering.lifetime;
-        if (lifetime != null) return lifetime;
+      // Search current offering first
+      if (offerings.current != null) {
+        for (final package in offerings.current!.availablePackages) {
+          if (package.storeProduct.identifier == productId ||
+              package.identifier == productId) {
+            return package;
+          }
+        }
       }
 
-      // Fallback: search all offerings by product/package identifier
+      // Search all offerings
       for (final offering in offerings.all.values) {
         for (final package in offering.availablePackages) {
           if (package.storeProduct.identifier == productId ||
@@ -92,7 +95,10 @@ class RevenueCatService {
         }
       }
 
-      return null;
+      // Last-resort fallback: default offering's lifetime package. Only
+      // correct for apps with a single paid product — an exact productId
+      // match above always wins, so this never masks a second paid product.
+      return offerings.all['default']?.lifetime;
     } catch (e) {
       debugPrint('RC fetchPackage error: $e');
       return null;
