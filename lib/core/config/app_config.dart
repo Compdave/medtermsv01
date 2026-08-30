@@ -51,6 +51,10 @@ class AppConfig {
   /// RevenueCat Google API key for this flavor.
   final String revenueCatGoogleApiKey;
 
+  /// This flavor's app_id in the app_versions table, used by the sign-in
+  /// update-notification check. Independent of the integer [appId] above.
+  final String versionCheckAppId;
+
   const AppConfig({
     required this.appName,
     required this.appSubtitle,
@@ -66,6 +70,7 @@ class AppConfig {
     required this.faqUrl,
     required this.revenueCatAppleApiKey,
     required this.revenueCatGoogleApiKey,
+    required this.versionCheckAppId,
   });
 
   /// Global singleton — set once at app startup in main_<flavor>.dart.

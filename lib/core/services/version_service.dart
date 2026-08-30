@@ -1,9 +1,22 @@
 // lib/core/services/version_service.dart
 
+import 'dart:io';
 import 'supabase_service.dart';
 
-/// Handles app version checking and update notification.
-/// Errors are thrown — callers are responsible for try/catch.
+/// Handles app version checking against the app_versions table
+/// (see version-notification-plan.md).
+///
+/// Read-only: writes to app_versions only ever happen server-side — the
+/// release script (Component A, scripts/notify_release_version.sh) sets
+/// pending_version right after a smoke-tested release, and the
+/// app-version-promotion Edge Function (Component B) promotes it to
+/// live_version once the store confirms the build is actually live. The
+/// client has no write policy on this table and never writes to it —
+/// unlike the old single-row "app writes on first open" table this
+/// replaced, which let any client claim to be the latest version.
+///
+/// Errors are thrown from [fetchLatestVersion] — callers are responsible
+/// for try/catch, or use [checkForUpdate] which never throws.
 class VersionService {
   VersionService._();
 
@@ -13,30 +26,21 @@ class VersionService {
   // Fetch
   // ---------------------------------------------------------------------------
 
-  /// Fetch the current live version string from the versions table.
-  /// Returns null if the table is empty.
-  /// Calls: latestversion()
-  static Future<String?> fetchLatestVersion() async {
-    final response = await _client.rpc('latestversion');
+  /// Fetch the current live version string for [versionCheckAppId] on this
+  /// platform. Returns null if no row exists yet, or on unsupported
+  /// (non-iOS/Android) platforms.
+  static Future<String?> fetchLatestVersion(String versionCheckAppId) async {
+    if (!Platform.isIOS && !Platform.isAndroid) return null;
+    final platform = Platform.isIOS ? 'ios' : 'android';
 
-    final list = response as List;
-    if (list.isEmpty) return null;
-    return (list.first as Map<String, dynamic>)['version'] as String?;
-  }
+    final response = await _client
+        .from('app_versions')
+        .select('live_version')
+        .eq('app_id', versionCheckAppId)
+        .eq('platform', platform)
+        .maybeSingle();
 
-  // ---------------------------------------------------------------------------
-  // Update
-  // ---------------------------------------------------------------------------
-
-  /// Update the stored version string to [version].
-  /// Always writes to id = 1 (single-row table).
-  /// Called automatically when a user installs a newer build.
-  /// Calls: updateversion(p_version)
-  static Future<void> updateVersion(String version) async {
-    await _client.rpc(
-      'updateversion',
-      params: {'p_version': version},
-    );
+    return response?['live_version'] as String?;
   }
 
   // ---------------------------------------------------------------------------
@@ -66,16 +70,26 @@ class VersionService {
     }
   }
 
-  /// Check the stored version against [currentVersion] and update
-  /// the DB if the current build is newer. Returns true if an update
-  /// was recorded (i.e. this user was first to install the new version).
-  static Future<bool> checkAndUpdateVersion(String currentVersion) async {
-    final stored = await fetchLatestVersion();
-    if (stored == null ||
-        isNewerVersion(stored: stored, current: currentVersion)) {
-      await updateVersion(currentVersion);
-      return true;
+  // ---------------------------------------------------------------------------
+  // Combined check
+  // ---------------------------------------------------------------------------
+
+  /// Returns the live version string if [currentVersion] is behind it, or
+  /// null if already up to date, no row exists yet, or the check failed.
+  /// Never throws — a broken version check should never block sign-in or
+  /// any other flow that calls it.
+  static Future<String?> checkForUpdate({
+    required String versionCheckAppId,
+    required String currentVersion,
+  }) async {
+    try {
+      final stored = await fetchLatestVersion(versionCheckAppId);
+      if (stored == null) return null;
+      final hasUpdate =
+          isNewerVersion(stored: currentVersion, current: stored);
+      return hasUpdate ? stored : null;
+    } catch (_) {
+      return null;
     }
-    return false;
   }
 }

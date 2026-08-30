@@ -21,4 +21,5 @@ const teasConfig = AppConfig(
   faqUrl: 'https://reichardreviews.com/faq-teas',
   revenueCatAppleApiKey: 'appl_QoVPqRfjzPsvSxGCVUNAMcOHkqK',
   revenueCatGoogleApiKey: 'goog_WccTLSJxiXZZfrKermONJlHZdqR',
+  versionCheckAppId: 'teasquiz',
 );

@@ -11,10 +11,12 @@ import 'dart:io';
 import 'package:medtermsv01/core/services/module_service.dart';
 import 'package:medtermsv01/core/services/quiz_service.dart';
 import 'package:medtermsv01/core/services/user_service.dart';
+import 'package:medtermsv01/core/services/version_service.dart';
 import 'package:medtermsv01/core/config/app_config.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:medtermsv01/core/theme/app_theme.dart';
+import 'package:medtermsv01/shared/bottom_sheets/upgrade_option_bottom_sheet.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -57,6 +59,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           final userId = response.user?.id;
           if (userId != null) await RevenueCatService.logIn(userId);
         }
+        if (mounted) await _checkForAppUpdate();
         if (mounted) context.go('/home');
       } else {
         await _handleSignUp(
@@ -119,7 +122,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     }
 
+    if (mounted) await _checkForAppUpdate();
     if (mounted) context.go('/home');
+  }
+
+  /// Checks the installed build against app_versions on every sign-in
+  /// (Component C of version-notification-plan.md) and shows a dismissible
+  /// update prompt if it's behind. Never blocks sign-in — a failed check
+  /// is silently ignored (see VersionService.checkForUpdate).
+  Future<void> _checkForAppUpdate() async {
+    if (!(Platform.isIOS || Platform.isAndroid)) return;
+    final info = await PackageInfo.fromPlatform();
+    final newVersion = await VersionService.checkForUpdate(
+      versionCheckAppId: AppConfig.instance.versionCheckAppId,
+      currentVersion: info.version,
+    );
+    if (newVersion != null && mounted) {
+      await UpgradeOptionBottomSheet.show(context, newVersion: newVersion);
+    }
   }
 
   /// Convert raw Supabase/auth error messages into user-friendly text.

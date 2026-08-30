@@ -167,7 +167,9 @@ class AppDrawer extends ConsumerWidget {
     try {
       final info = await PackageInfo.fromPlatform();
       final currentVersion = info.version;
-      final stored = await VersionService.fetchLatestVersion();
+      final stored = await VersionService.fetchLatestVersion(
+        AppConfig.instance.versionCheckAppId,
+      );
 
       if (!context.mounted) return;
 
