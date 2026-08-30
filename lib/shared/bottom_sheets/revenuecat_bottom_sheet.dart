@@ -109,33 +109,49 @@ class _RevenuecatBottomSheetState extends ConsumerState<RevenuecatBottomSheet> {
     }
     final userId = SupabaseService.currentUserId ?? '';
     final email = SupabaseService.currentUser?.email ?? '';
-    final unlocked = await RevenueCatService.ensureModuleUnlocked(
-      userId: userId,
-      quizId: widget.quizId,
-    );
-    if (!unlocked) {
+    try {
+      final unlocked = await RevenueCatService.ensureModuleUnlocked(
+        userId: userId,
+        quizId: widget.quizId,
+      );
+      if (!unlocked) {
+        if (mounted) {
+          setState(() {
+            _isLoadingPackage = false;
+            _isConfirmingUnlock = false;
+          });
+        }
+        return;
+      }
+      await CustomerService.upsertRevenueCatCustomer(
+        userId: userId,
+        email: email,
+      );
+      ref.invalidate(moduleListProvider);
+      if (mounted) {
+        Navigator.of(context).pop();
+        if (widget.onPurchaseComplete != null) {
+          widget.onPurchaseComplete!();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('"${widget.moduleName}" is ready to study!'),
+              backgroundColor: AppColors.primary,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    } catch (e) {
       if (mounted) {
         setState(() {
           _isLoadingPackage = false;
           _isConfirmingUnlock = false;
         });
-      }
-      return;
-    }
-    await CustomerService.upsertRevenueCatCustomer(
-      userId: userId,
-      email: email,
-    );
-    ref.invalidate(moduleListProvider);
-    if (mounted) {
-      Navigator.of(context).pop();
-      if (widget.onPurchaseComplete != null) {
-        widget.onPurchaseComplete!();
-      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('"${widget.moduleName}" is ready to study!'),
-            backgroundColor: AppColors.primary,
+            content: Text('Unlock confirmation failed: $e'),
+            backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
           ),
         );
