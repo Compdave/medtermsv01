@@ -21,5 +21,5 @@ const medtermsConfig = AppConfig(
   faqUrl: 'https://reichardreviews.com/faq',
   revenueCatAppleApiKey: 'appl_TjYTNqPGuAouWCumGZtIQzqXhem',
   revenueCatGoogleApiKey: 'goog_NrxoyAnTCUEtfRywqFYUXVJeQwG',
-  versionCheckAppId: 'medterms',
+  versionCheckAppId: 'com.reichardreviews.medterms',
 );

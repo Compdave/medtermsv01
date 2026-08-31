@@ -512,5 +512,7 @@ final leadersProvider = FutureProvider<List<LeadersModel>>((ref) async {
 
 /// Fetches the latest version string from the DB.
 final latestVersionProvider = FutureProvider<String?>((ref) async {
-  return VersionService.fetchLatestVersion();
+  return VersionService.fetchLatestVersion(
+    AppConfig.instance.versionCheckAppId,
+  );
 });
