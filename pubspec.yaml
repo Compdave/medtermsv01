@@ -1,14 +1,14 @@
 name: medtermsv01
 description: Medical Terminology Q&A App
 publish_to: 'none'
-version: 2.23.91+91
+version: 2.23.93+93
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
 
 dependencies:
   flutter:
-    sdk: flutter
+    sdk: flutter: stable
 
   # ── Supabase ──────────────────────────────────────────────
   supabase_flutter: ^2.5.6          # Supabase client + auth + realtime
