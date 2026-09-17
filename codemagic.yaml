@@ -25,7 +25,7 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.reichardreviews.medterms
-      flutter: 3.29.3
+      flutter: stable
       xcode: 26
       cocoapods: default
       vars:
@@ -138,7 +138,7 @@ workflows:
     environment:
       groups:
         - secrets
-      flutter: 3.29.3
+      flutter: stable
       android_signing:
         - medtermsv01_keystore
       vars:
@@ -221,7 +221,7 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.reichardreviews.teassci26
-      flutter: 3.29.3
+      flutter: stable
       xcode: 26
       cocoapods: default
       vars:
@@ -340,7 +340,7 @@ workflows:
     environment:
       groups:
         - secrets
-      flutter: 3.29.3
+      flutter: stable
       android_signing:
         - medtermsv01_keystore
       vars:
