@@ -105,8 +105,8 @@ workflows:
           ARCHIVE="build/ios/archive/Runner.xcarchive"
           PLIST="$ARCHIVE/Products/Applications/Runner.app/Frameworks/App.framework/Info.plist"
           if [ -f "$PLIST" ]; then
-            /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 13.0" "$PLIST" 2>/dev/null || \
-            /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 13.0" "$PLIST"
+            /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 15.0" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 15.0" "$PLIST"
           fi
 
           xcodebuild -exportArchive \
@@ -307,8 +307,8 @@ workflows:
           ARCHIVE="build/ios/archive/Runner.xcarchive"
           PLIST="$ARCHIVE/Products/Applications/Runner.app/Frameworks/App.framework/Info.plist"
           if [ -f "$PLIST" ]; then
-            /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 13.0" "$PLIST" 2>/dev/null || \
-            /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 13.0" "$PLIST"
+            /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string 15.0" "$PLIST" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion 15.0" "$PLIST"
           fi
 
           xcodebuild -exportArchive \
